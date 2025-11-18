@@ -1,25 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Mock Supabase client for testing
-jest.mock('./lib/supabase', () => ({
-  supabase: {
-    rpc: jest.fn(),
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(),
-        neq: jest.fn(),
-        lt: jest.fn(),
-        gt: jest.fn(),
-        lte: jest.fn(),
-        gte: jest.fn(),
-        ilike: jest.fn(),
-        is: jest.fn(),
-        not: jest.fn(),
-      })),
-    })),
-  },
-}));
-
 describe('Database Connection Tests', () => {
   describe('Supabase Client Initialization', () => {
     it('should initialize with correct environment variables', () => {
@@ -169,7 +149,7 @@ describe('JOIN Configuration Tests', () => {
         targetColumn: 'id',
       };
 
-      const isValid = join.targetTable && join.sourceColumn && join.targetColumn;
+      const isValid = !!(join.targetTable && join.sourceColumn && join.targetColumn);
       expect(isValid).toBe(true);
     });
 
@@ -181,7 +161,7 @@ describe('JOIN Configuration Tests', () => {
         targetColumn: '',
       };
 
-      const isValid = join.targetTable && join.sourceColumn && join.targetColumn;
+      const isValid = !!(join.targetTable && join.sourceColumn && join.targetColumn);
       expect(isValid).toBe(false);
     });
   });

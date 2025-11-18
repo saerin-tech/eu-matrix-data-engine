@@ -1,4 +1,4 @@
-import { mapPostgresType } from '../utils/typeMapping';
+import { mapPostgresType } from '../../app/utils/typeMapping';
 
 describe('PostgreSQL Type Mapping Utility', () => {
   describe('mapPostgresType', () => {
