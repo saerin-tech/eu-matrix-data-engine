@@ -207,6 +207,31 @@ export default function Home() {
     setJoins(updatedJoins);
   }
 
+   function processQueryRules(ruleGroup: RuleGroupType): any {
+    const processedRules = ruleGroup.rules.map((rule: any) => {
+      if ('rules' in rule && Array.isArray(rule.rules)) {
+        return {
+          combinator: rule.combinator || 'and',
+          rules: processQueryRules(rule).rules,
+          isGroup: true // Mark as group for backend identification
+        };
+      } else {
+        // This is a regular rule
+        if (rule.field && rule.operator && rule.value !== undefined && rule.value !== '') {
+          return {
+            field: rule.field.includes('.') ? rule.field.split('.')[1] : rule.field,
+            operator: rule.operator,
+            value: rule.value,
+            isGroup: false
+          };
+        }
+      }
+      return null;
+    }).filter(Boolean); // Remove null values
+
+    return { combinator: ruleGroup.combinator, rules: processedRules };
+  }
+
   async function executeQuery() {
     if (!selectedTable) {
       setError('Please select a table first!');
@@ -273,23 +298,22 @@ export default function Home() {
     setError(null);
 
     try {
-      const conditions = query.rules
-        .filter((rule: any) => 
-          rule.field && rule.operator && rule.value !== undefined && rule.value !== ''
-        )
-        .map((rule: any) => ({
-          field: rule.field.includes('.') ? rule.field.split('.')[1] : rule.field,
-          operator: rule.operator,
-          value: rule.value,
-        }));
+      const processedQuery = processQueryRules(query);
 
       const payload = {
         table: selectedTable,
-        conditions: conditions,
+        query: processedQuery, // Complete query with groups and rules
+        conditions: processedQuery.rules,
         joins: joins,
+        metadata: {
+          totalRules: query.rules.length,
+          hasNestedGroups: query.rules.some((rule: any) => 'rules' in rule),
+          rootCombinator: query.combinator
+        }
       };
 
       console.log('Sending to backend:', payload);
+      console.log('Full query structure:', JSON.stringify(payload.query, null, 2));
 
       const response = await fetch('https://eumatrix.app.n8n.cloud/webhook/query', {
         method: 'POST',
@@ -343,7 +367,11 @@ export default function Home() {
 
   return (
     <div className="p-5 max-w-[1400px] mx-auto">
-      <h1 className="mb-5 text-2xl font-bold text-gray-800">EU Matrix Data Engine</h1>
+      <h1 className="mb-5 text-2xl font-bold text-white">
+        {process.env.NEXT_PUBLIC_ORGANIZATION
+          ? `${process.env.NEXT_PUBLIC_ORGANIZATION} Query Craft Data Engine`
+          : "Query Craft Data Engine"}
+      </h1>
       
       {/* Connection Status */}
       <div className={`p-4 mb-5 rounded-lg border flex items-center gap-3 ${

@@ -28,8 +28,8 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/zaavia-team/eu-matrix-data-engine.git
-cd eu-matrix-data-engine
+git clone https://github.com/zaavia-team/query-craft.git
+cd query-craft-data-engine
 ```
 
 2. **Install dependencies:**
@@ -129,7 +129,7 @@ npm start
 ## 📁 Project Structure
 
 ```
-eu-matrix-data-engine/
+query-craft-data-engine/
 ├── app/
 │   ├── components/
 │   │   └── Pagination.tsx      # Pagination component with items per page

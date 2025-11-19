@@ -1,7 +1,7 @@
-# EU Matrix Data Engine - Test Documentation
+# Query Craft Data Engine - Test Documentation
 
 ## Overview
-This document provides comprehensive test coverage for the EU Matrix Data Engine project, including unit tests, integration tests, and end-to-end test scenarios.
+This document provides comprehensive test coverage for the Query Craft Data Engine project, including unit tests, integration tests, and end-to-end test scenarios.
 
 ## Test Setup
 
