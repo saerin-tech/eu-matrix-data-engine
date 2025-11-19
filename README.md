@@ -1,4 +1,4 @@
-# EU Matrix Data Engine
+# Query Craft Data Engine
 
 A powerful visual query builder application built with Next.js and React that enables users to construct complex database queries through an intuitive drag-and-drop interface. This project extends the [React Query Builder](https://react-querybuilder.js.org/) library with enterprise features including Supabase/PostgreSQL integration, multi-table joins, dynamic filtering, and real-time query execution with backend webhook integration.
 
@@ -274,7 +274,7 @@ This project is private and proprietary.
 
 ## 🙏 Credits
 
-This project is built upon the excellent [React Query Builder](https://react-querybuilder.js.org/) library. EU Matrix Data Engine extends React Query Builder with enterprise features including database connectivity, automatic schema discovery, and advanced JOIN operations.
+This project is built upon the excellent [React Query Builder](https://react-querybuilder.js.org/) library. Query Craft Data Engine extends React Query Builder with enterprise features including database connectivity, automatic schema discovery, and advanced JOIN operations.
 
 Special thanks to the React Query Builder community for creating such a flexible and powerful foundation.
 
