@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { RuleGroupType, Field } from 'react-querybuilder';
 import ConnectionStatus from './components/ConnectionStatus';
 import TableSelector from './components/TableSelector';
@@ -10,6 +11,7 @@ import ErrorAlert from './components/ErrorAlert';
 import ResultsTable from './components/ResultsTable';
 import { JoinConfig, ConnectionStatus as Status } from './types';
 import { useQueryBuilder } from './hooks/useQueryBuilder';
+import { Loader, LogOut } from 'lucide-react';
 
 const initialQuery: RuleGroupType = {
   combinator: 'and',
@@ -17,6 +19,10 @@ const initialQuery: RuleGroupType = {
 };
 
 export default function Page() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<Status>('checking');
   const [tables, setTables] = useState<string[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>('');
@@ -42,7 +48,6 @@ export default function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Custom hook usage
   const { 
     checkConnection, 
     loadTables: fetchTables, 
@@ -50,9 +55,25 @@ export default function Page() {
     executeQuery: runQuery 
   } = useQueryBuilder(setConnectionStatus, setTables, setFields, setData, setError, setAvailableColumns);
 
+  // Check authentication
   useEffect(() => {
-    checkConnection();
-  }, []);
+    const userId = sessionStorage.getItem('userId');
+    const userName = sessionStorage.getItem('userName');
+    
+    if (!userId || !userName) {
+      router.push('/login');
+    } else {
+      setIsAuthenticated(true);
+      setUserEmail(userName);
+      setCheckingAuth(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkConnection();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (connectionStatus === 'connected') {
@@ -168,13 +189,49 @@ export default function Page() {
     setCurrentPage(1);
   }
 
+  function handleLogout() {
+    sessionStorage.removeItem('userId');
+    sessionStorage.removeItem('userName');
+    router.push('/login');
+  }
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen  from-gray-900 to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-300">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="p-5 max-w-[1400px] mx-auto">
-      <h1 className="mb-5 text-2xl font-bold text-white">
-        {process.env.NEXT_PUBLIC_ORGANIZATION
-          ? `${process.env.NEXT_PUBLIC_ORGANIZATION} Explore EUmatrix political data`
-          : "Explore EUmatrix political data"}
-      </h1>
+      <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
+        <h1 className="text-2xl font-bold text-white">
+          {process.env.NEXT_PUBLIC_ORGANIZATION
+            ? `${process.env.NEXT_PUBLIC_ORGANIZATION} Explore EUmatrix political data`
+            : "Explore EUmatrix political data"}
+        </h1>
+        
+        <div className="flex items-center gap-3">
+          <span className="text-gray-300 text-sm">
+            Welcome, <strong>{userEmail}</strong>
+          </span>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 cursor-pointer text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
+        </div>
+      </div>
       
       <ConnectionStatus status={connectionStatus} />
 
