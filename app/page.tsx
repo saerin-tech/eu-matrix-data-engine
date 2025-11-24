@@ -280,7 +280,7 @@ export default function Page() {
             queryExecuted={queryExecuted} 
             onPageChange={setCurrentPage}
             onItemsPerPageChange={(items) => {
-              setItemsPerPage(items);
+              setItemsPerPage(items); 
               setCurrentPage(1);
             }}
           />
