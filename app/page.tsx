@@ -31,6 +31,7 @@ export default function Page() {
   const [joins, setJoins] = useState<JoinConfig[]>([]);
   const [data, setData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [queryExecuted, setQueryExecuted] = useState(false); 
   
   const [loadingTables, setLoadingTables] = useState(false);
   const [loadingColumns, setLoadingColumns] = useState(false);
@@ -184,6 +185,7 @@ export default function Page() {
       return;
     }
     setLoadingQuery(true);
+    setQueryExecuted(true); 
     await runQuery(selectedTable, query, joins);
     setLoadingQuery(false);
     setCurrentPage(1);
@@ -197,7 +199,7 @@ export default function Page() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen  from-gray-900 to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-center">
           <Loader className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
           <p className="text-gray-300">Checking authentication...</p>
@@ -275,6 +277,7 @@ export default function Page() {
             data={data}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
+            queryExecuted={queryExecuted} 
             onPageChange={setCurrentPage}
             onItemsPerPageChange={(items) => {
               setItemsPerPage(items);

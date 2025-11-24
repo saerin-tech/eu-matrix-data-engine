@@ -99,6 +99,7 @@ export function useQueryBuilder(
 
   async function executeQuery(selectedTable: string, query: RuleGroupType, joins: JoinConfig[]) {
     setError(null);
+    setData([]); 
     try {
       const processedQuery = processQueryRules(query);
      
@@ -114,15 +115,34 @@ export function useQueryBuilder(
 
       const result = await response.json();
       
+      if (result.success === false) {
+        const errorMessage = result.userMessage || 'Query syntax error. Please check your query.';
+        setError(errorMessage);
+        
+
+        if (result.devMessage) {
+          console.error('Query Error Details:', result.devMessage);
+        }
+        return; 
+      }
+
       if (!response.ok) {
-        throw new Error(result.error || 'Query failed');
+        const errorMessage = result.error || result.userMessage || 'Query failed';
+        setError(errorMessage);
+        console.error('Query error:', result);
+        return;
       }
 
       setData(result.data || []);
-      console.log('Query executed successfully. Results:', result.count);
+      
+      if (result.data && result.data.length === 0) {
+        console.log('Query executed successfully but no results found');
+      } else {
+        console.log('Query executed successfully. Results:', result.count);
+      }
     } catch (err: any) {
-      setError(err.message);
-      console.error('Query error:', err);
+      setError('Network error: Unable to execute query');
+      console.error('Query execution error:', err);
     }
   }
 
