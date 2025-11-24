@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { table, query, joins = [] } = body;
-    console.log(query, "=>query");
+    // console.log(query, "=>query");
 
     if (!table) {
       return NextResponse.json(
@@ -75,81 +75,118 @@ export async function POST(request: Request) {
     );
   }
 }
+  function q(identifier: string): string {
+  return `"${identifier.replace(/"/g, '""')}"`;
+}
 
-function buildSQL(table: string, query: RuleGroup, joins: JoinConfig[]): string {
-  let sql = `SELECT ${table}.*`;
+  function buildSQL(table: string, query: RuleGroup, joins: JoinConfig[]): string {
+  const main = q(table);
 
-  // Add all join table columns with alias to avoid conflicts
+  let sql = `SELECT ${main}.*`;
+
   joins.forEach((j, index) => {
-    const alias = `j${index}`; // j0, j1...
-    sql += `, ${j.targetTable}.*`; // optionally: `${j.targetTable} AS ${alias}`
+    const alias = `j${index}`;
+    sql += `, ${q(alias)}.*`;
   });
 
-  sql += ` FROM ${table}`;
+  sql += ` FROM ${main}`;
 
-  // Proper JOIN statements
-  joins.forEach((j) => {
+  joins.forEach((j, index) => {
     if (!j.sourceColumn || !j.targetColumn) {
       throw new Error(`JOIN columns missing for table ${j.targetTable}`);
     }
-    const joinType = j.type === "INNER" ? "" : `${j.type} JOIN`;
-    sql += ` ${joinType} JOIN ${j.targetTable} ON ${table}.${j.sourceColumn} = ${j.targetTable}.${j.targetColumn}`;
+
+    const joinType = j.type ? `${j.type} JOIN` : "JOIN";
+    const alias = `j${index}`;
+
+    sql += ` ${joinType} ${q(j.targetTable)} ${q(alias)}`
+         + ` ON ${main}.${q(j.sourceColumn)} = ${q(alias)}.${q(j.targetColumn)}`;
   });
 
-  // Build WHERE clause
-  if (query && query.rules.length > 0) {
-    const whereClause = buildWhere(query, table);
+  if (query?.rules?.length) {
+    const whereClause = buildWhere(query, table, q);
     if (whereClause.trim() !== "") {
       sql += ` WHERE ${whereClause}`;
     }
   }
-
+// console.log(sql, "=> SQL Query")
   return sql;
 }
 
-function buildWhere(group: RuleGroup, table: string): string {
+function buildWhere(group: RuleGroup, table: string, q: (s: string) => string): string {
   const parts: string[] = [];
 
   for (const rule of group.rules) {
     if ("rules" in rule) {
-      const nested = buildWhere(rule, table);
-      if (nested.trim() !== "") parts.push(`(${nested})`);
-      continue;
-    }
-
-    if (rule.field && rule.operator) {
-      parts.push(buildCondition(rule, table));
+      const nested = buildWhere(rule, table, q);
+      if (nested.trim()) parts.push(`(${nested})`);
+    } else if (rule.field && rule.operator) {
+      parts.push(buildCondition(rule, table, q));
     }
   }
 
   return parts.join(` ${group.combinator.toUpperCase()} `);
 }
 
-function buildCondition(rule: Rule, defaultTable: string): string {
-  // If field has dot notation, use as is. Else use default table
-  let field = rule.field.includes(".") ? rule.field : `${defaultTable}.${rule.field}`;
+function buildCondition(
+  rule: Rule,
+  defaultTable: string,
+  q: (s: string) => string
+): string {
 
-  // Escape string values
-  const escape = (val: any) =>
-    typeof val === "string" ? `'${val.replace(/'/g, "''")}'` : String(val);
+  // Determine fully-qualified field with quoting
+  let field: string;
+  if (rule.field.includes(".")) {
+    // Example: "users.name" → `"users"."name"`
+    const [tbl, col] = rule.field.split(".");
+    field = `${q(tbl)}.${q(col)}`;
+  } else {
+    // Example: name → `"mainTable"."name"`
+    field = `${q(defaultTable)}.${q(rule.field)}`;
+  }
+
+  // Escape string values safely for SQL
+  const escapeValue = (val: any) => 
+    typeof val === "string"
+      ? `'${val.replace(/'/g, "''")}'`
+      : String(val);
 
   switch (rule.operator) {
-    case "=": return `${field} = ${escape(rule.value)}`;
-    case "!=": return `${field} != ${escape(rule.value)}`;
-    case "<": return `${field} < ${escape(rule.value)}`;
-    case ">": return `${field} > ${escape(rule.value)}`;
-    case "<=": return `${field} <= ${escape(rule.value)}`;
-    case ">=": return `${field} >= ${escape(rule.value)}`;
-    case "contains": return `${field} ILIKE '%${rule.value}%'`;
-    case "beginsWith": return `${field} ILIKE '${rule.value}%'`;
-    case "endsWith": return `${field} ILIKE '%${rule.value}'`;
-    case "null": return `${field} IS NULL`;
-    case "notNull": return `${field} IS NOT NULL`;
+    case "=":
+      return `${field} = ${escapeValue(rule.value)}`;
+    case "!=":
+      return `${field} != ${escapeValue(rule.value)}`;
+    case "<":
+      return `${field} < ${escapeValue(rule.value)}`;
+    case ">":
+      return `${field} > ${escapeValue(rule.value)}`;
+    case "<=":
+      return `${field} <= ${escapeValue(rule.value)}`;
+    case ">=":
+      return `${field} >= ${escapeValue(rule.value)}`;
+
+    case "contains":
+      return `${field} ILIKE '%${String(rule.value).replace(/'/g, "''")}%'`;
+
+    case "beginsWith":
+      return `${field} ILIKE '${String(rule.value).replace(/'/g, "''")}%'`;
+
+    case "endsWith":
+      return `${field} ILIKE '%${String(rule.value).replace(/'/g, "''")}'`;
+
+    case "null":
+      return `${field} IS NULL`;
+
+    case "notNull":
+      return `${field} IS NOT NULL`;
+
     case "in":
-      const arr = Array.isArray(rule.value)
-        ? rule.value.map(v => escape(v)).join(", ")
-        : escape(rule.value);
-      return `${field} IN (${arr})`;
-    default: return `${field} = ${escape(rule.value)}`;
+      const list = Array.isArray(rule.value)
+        ? rule.value.map((v) => escapeValue(v)).join(", ")
+        : escapeValue(rule.value);
+      return `${field} IN (${list})`;
+
+    default:
+      return `${field} = ${escapeValue(rule.value)}`;
   }
 }
