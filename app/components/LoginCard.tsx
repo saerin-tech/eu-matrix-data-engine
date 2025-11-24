@@ -3,16 +3,10 @@ import { Database, AlertCircle } from 'lucide-react';
 import LoginForm from './LoginForm';
 
 interface Props {
-  seedEnabled: boolean;
-  seedCredentials: { user_name: string; user_password: string } | null;
-  seedError: string | null;
   onLoginSuccess: (userId: string, userName: string) => void;
 }
 
 export default function LoginCard({ 
-  seedEnabled, 
-  seedCredentials, 
-  seedError,
   onLoginSuccess 
 }: Props) {
   return (
@@ -30,13 +24,6 @@ export default function LoginCard({
         <p className="text-center text-gray-600 mb-6">
           Sign in to access the database explorer
         </p>
-
-        {seedError && (
-          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 mt-0.5" />
-            <span>{seedError}</span>
-          </div>
-        )}
 
         <LoginForm onLoginSuccess={onLoginSuccess} />
 

@@ -6,9 +6,6 @@ import { Loader } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [seedEnabled, setSeedEnabled] = useState(false);
-  const [seedCredentials, setSeedCredentials] = useState<{ user_name: string; user_password: string } | null>(null);
-  const [seedError, setSeedError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,27 +24,14 @@ export default function LoginPage() {
       // Check if SEED is enabled
       
       const seedEnv = process.env.NEXT_PUBLIC_SEED === 'TRUE';
-      setSeedEnabled(seedEnv);
-
       if (seedEnv) {
         const response = await fetch('/api/auth/seed', {
           method: 'POST'
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-          if (result.credentials) {
-            // New user was created - show in console
-            setSeedCredentials(result.credentials);
-          }
-        } else {
-          setSeedError(result.message);
-        }
       }
     } catch (error) {
       console.error('Seed check failed:', error);
-      setSeedError('Failed to check seed status');
     } finally {
       setLoading(false);
     }
@@ -76,9 +60,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <LoginCard
-        seedEnabled={seedEnabled}
-        seedCredentials={seedCredentials}
-        seedError={seedError}
         onLoginSuccess={handleLoginSuccess}
       />
     </div>
