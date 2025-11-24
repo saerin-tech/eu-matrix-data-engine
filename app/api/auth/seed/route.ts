@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       console.log('-----------------------------------');
     }
     
-    return NextResponse.json(result.message);
+    return NextResponse.json({message : result.message});
   } catch (error: any) {
     console.error(' Seed API error:', error);
     return NextResponse.json(
