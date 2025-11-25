@@ -41,7 +41,6 @@ export async function POST(request: Request) {
       });
 
       if (error) {
-        console.log("SQL ERROR →", error.message);
 
         return NextResponse.json(
           {
@@ -145,34 +144,42 @@ function buildCondition(
     field = `${q(defaultTable)}.${q(rule.field)}`;
   }
 
-  // Escape string values safely for SQL
-  const escapeValue = (val: any) => 
-    typeof val === "string"
-      ? `'${val.replace(/'/g, "''")}'`
-      : String(val);
+  // Wrap field with unaccent+lower
+  const normField = `unaccent(lower(${field}))`;
+
+  // Escape and normalize values
+  const escapeValue = (val: any) => {
+    if (val === null || val === undefined) return "NULL";
+    if (typeof val === "string") {
+      const clean = val.replace(/'/g, "''");
+      return `unaccent(lower('${clean}'))`;
+    }
+    return `unaccent(lower('${String(val)}'))`;
+  };
 
   switch (rule.operator) {
     case "=":
-      return `${field} = ${escapeValue(rule.value)}`;
+      return `${normField} = ${escapeValue(rule.value)}`;
     case "!=":
-      return `${field} != ${escapeValue(rule.value)}`;
+      return `${normField} != ${escapeValue(rule.value)}`;
     case "<":
-      return `${field} < ${escapeValue(rule.value)}`;
+      return `${normField} < ${escapeValue(rule.value)}`;
     case ">":
-      return `${field} > ${escapeValue(rule.value)}`;
+      return `${normField} > ${escapeValue(rule.value)}`;
     case "<=":
-      return `${field} <= ${escapeValue(rule.value)}`;
+      return `${normField} <= ${escapeValue(rule.value)}`;
     case ">=":
-      return `${field} >= ${escapeValue(rule.value)}`;
+      return `${normField} >= ${escapeValue(rule.value)}`;
 
+    // LIKE operators (case-insensitive already, but add unaccent)
     case "contains":
-      return `${field} ILIKE '%${String(rule.value).replace(/'/g, "''")}%'`;
+      return `${normField} LIKE unaccent(lower('%${String(rule.value).replace(/'/g, "''")}%'))`;
 
     case "beginsWith":
-      return `${field} ILIKE '${String(rule.value).replace(/'/g, "''")}%'`;
+      return `${normField} LIKE unaccent(lower('${String(rule.value).replace(/'/g, "''")}%'))`;
 
     case "endsWith":
-      return `${field} ILIKE '%${String(rule.value).replace(/'/g, "''")}'`;
+      return `${normField} LIKE unaccent(lower('%${String(rule.value).replace(/'/g, "''")}'))`;
 
     case "null":
       return `${field} IS NULL`;
@@ -184,9 +191,9 @@ function buildCondition(
       const list = Array.isArray(rule.value)
         ? rule.value.map((v) => escapeValue(v)).join(", ")
         : escapeValue(rule.value);
-      return `${field} IN (${list})`;
+      return `${normField} IN (${list})`;
 
     default:
-      return `${field} = ${escapeValue(rule.value)}`;
+      return `${normField} = ${escapeValue(rule.value)}`;
   }
 }
