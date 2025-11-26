@@ -1,4 +1,5 @@
-import { QueryBuilder, RuleGroupType, Field } from 'react-querybuilder';
+import { RuleGroupType, Field, QueryBuilder } from 'react-querybuilder';
+import ColumnSelector from "./ColumnSelector";
 import { Plus, Loader } from 'lucide-react';
 import JoinList from './JoinList';
 import { JoinConfig } from '../types';
@@ -13,6 +14,7 @@ interface Props {
   onQueryChange: (query: RuleGroupType) => void;
   onOpenJoinModal: () => void;
   onRemoveJoin: (index: number) => void;
+  onColumnsChange: React.Dispatch<React.SetStateAction<{ table: string; column: string; alias: string }[]>>; 
 }
 
 export default function QueryBuilderSection({
@@ -23,10 +25,12 @@ export default function QueryBuilderSection({
   loading,
   onQueryChange,
   onOpenJoinModal,
-  onRemoveJoin
+  onRemoveJoin,
+  onColumnsChange 
 }: Props) {
+
   return (
-    <div className="border border-gray-300 rounded-lg p-5 mb-5 bg-white">
+    <div className="border min-h-[400px] max-h-[400px] border-gray-300 rounded-lg p-5 mb-5 bg-white">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <h2 className="m-0 text-md font-semibold text-gray-800">
           Select the columns and filters you would like to visualise in the database
@@ -59,11 +63,30 @@ export default function QueryBuilderSection({
           Loading columns...
         </p>
       ) : (
-        <QueryBuilder 
-          fields={fields} 
-          query={query} 
-          onQueryChange={onQueryChange} 
-        />
+
+        <div className='flex justify-between'>
+        <div className='w-[37%]'>
+          <ColumnSelector
+            table={selectedTable}
+            joins={joins}
+            onColumnsChange={onColumnsChange}
+          />
+          </div>
+          <div className='min-h-[300px] w-[60%]'>
+          <QueryBuilder 
+            fields={fields} 
+            query={query} 
+            onQueryChange={onQueryChange}
+            controlClassnames={{
+            ruleGroup: "min-h-[300px] max-h-[300px] bg-slate-800/50 p-4 rounded-lg border border-slate-700 overflow-y-auto",
+          }}
+            translations={{
+              addRule: { label: "Add Filter" },
+              addGroup: { label: "Add New Group" },
+            }}
+          />
+        </div>
+        </div>
       )}
     </div>
   );

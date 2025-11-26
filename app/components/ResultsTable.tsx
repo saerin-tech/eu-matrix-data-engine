@@ -44,20 +44,20 @@ export default function ResultsTable({
 
   return (
     <div className="border border-gray-300 rounded-lg mb-5 bg-white overflow-hidden">
-      <div className="p-5 border-b border-gray-300 bg-gray-50">
+      <div className="p-8 border-b border-gray-300 bg-gray-50">
         <h2 className="m-0 text-xl font-semibold text-gray-800">
           Results ({data.length} total records)
         </h2>
       </div>
 
-      <div className="overflow-x-auto max-w-full">
+      <div className="overflow-x-auto max-w-full ">
         <table className="w-full border-collapse min-w-[600px]">
           <thead>
             <tr className="bg-gray-50">
               {columns.map((column, index) => (
                 <th 
                   key={index} 
-                  className="px-4 py-3 text-left border-b-2 border-gray-300 text-gray-700 font-semibold text-sm whitespace-nowrap sticky top-0 bg-gray-50 z-10"
+                  className="px-8 py-3 text-left border-b-2 border-gray-300 text-gray-700 font-semibold text-sm whitespace-nowrap sticky top-0 bg-gray-50 z-10"
                 >
                   {column}
                 </th>
@@ -73,7 +73,7 @@ export default function ResultsTable({
                 {columns.map((column, colIndex) => (
                   <td 
                     key={colIndex}
-                    className="px-4 py-3 border-b border-gray-300 text-gray-800 text-sm max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap"
+                    className="px-8 py-3 border-b border-gray-300 text-gray-800 text-sm max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap"
                   >
                     {typeof row[column] === 'object' 
                       ? JSON.stringify(row[column]) 

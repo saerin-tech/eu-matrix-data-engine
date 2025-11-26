@@ -20,7 +20,7 @@ export default function TableSelector({
   return (
     <div className="border border-gray-300 rounded-lg p-5 mb-5 bg-white">
       <h2 className="mb-4 text-md font-semibold text-gray-800">
-        Select the database that you would like to access (e.g. MEPs, Commissioners, ministers, etc.)
+        Select the table that you would like to access (e.g. MEPs, Commissioners, ministers, etc.)
       </h2>
       
       <div className="flex gap-2 flex-wrap">

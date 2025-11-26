@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RuleGroupType, Field } from 'react-querybuilder';
+import Header from './components/Header';
 import ConnectionStatus from './components/ConnectionStatus';
 import TableSelector from './components/TableSelector';
 import QueryBuilderSection from './components/QueryBuilderSection';
@@ -11,7 +12,8 @@ import ErrorAlert from './components/ErrorAlert';
 import ResultsTable from './components/ResultsTable';
 import { JoinConfig, ConnectionStatus as Status } from './types';
 import { useQueryBuilder } from './hooks/useQueryBuilder';
-import { Loader, LogOut } from 'lucide-react';
+import { Loader } from 'lucide-react';
+import Footer from './components/Footer';
 
 const initialQuery: RuleGroupType = {
   combinator: 'and',
@@ -32,6 +34,8 @@ export default function Page() {
   const [data, setData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [queryExecuted, setQueryExecuted] = useState(false); 
+  
+  const [selectedColumns, setSelectedColumns] = useState<{ table: string; column: string; alias: string }[]>([]);
   
   const [loadingTables, setLoadingTables] = useState(false);
   const [loadingColumns, setLoadingColumns] = useState(false);
@@ -85,6 +89,7 @@ export default function Page() {
   useEffect(() => {
     if (selectedTable && selectedTable.trim() !== '') {
       handleLoadColumns(selectedTable);
+      setSelectedColumns([]);
     } else {
       setFields([]);
     }
@@ -185,8 +190,9 @@ export default function Page() {
       return;
     }
     setLoadingQuery(true);
-    setQueryExecuted(true); 
-    await runQuery(selectedTable, query, joins);
+    setQueryExecuted(false);
+    await runQuery(selectedTable, selectedColumns, query, joins);
+    setQueryExecuted(true);
     setLoadingQuery(false);
     setCurrentPage(1);
   }
@@ -213,32 +219,16 @@ export default function Page() {
   }
 
   return (
-    <div className="p-5 max-w-[1400px] mx-auto">
-      <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-white">
-          {process.env.NEXT_PUBLIC_ORGANIZATION
-            ? `${process.env.NEXT_PUBLIC_ORGANIZATION}`
-            : "Query Craft Engine"}
-        </h1>
-        
-        <div className="flex items-center gap-3">
-          <span className="text-gray-300 text-sm">
-            Welcome, <strong>{userEmail}</strong>
-          </span>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 cursor-pointer text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen flex flex-col p-5 max-w-[1400px] mx-auto">
       
-      <ConnectionStatus status={connectionStatus} />
-
+      <Header 
+        userEmail={userEmail}
+        onLogout={handleLogout}
+        organizationName={process.env.NEXT_PUBLIC_ORGANIZATION}
+      />
+      
       {connectionStatus === 'connected' && (
-        <>
+        <div className='flex-1'>
           <TableSelector
             tables={tables}
             selectedTable={selectedTable}
@@ -258,6 +248,7 @@ export default function Page() {
               onQueryChange={setQuery}
               onOpenJoinModal={handleOpenJoinModal}
               onRemoveJoin={handleRemoveJoin}
+              onColumnsChange={setSelectedColumns} 
             />
           )}
 
@@ -277,7 +268,7 @@ export default function Page() {
             data={data}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            queryExecuted={queryExecuted} 
+            queryExecuted={queryExecuted}
             onPageChange={setCurrentPage}
             onItemsPerPageChange={(items) => {
               setItemsPerPage(items); 
@@ -299,8 +290,9 @@ export default function Page() {
             onTargetTableChange={handleTargetTableChange}
             onAdd={handleAddJoin}
           />
-        </>
+        </div>
       )}
+      <Footer/>
     </div>
   );
 }

@@ -7,9 +7,8 @@ export function useQueryBuilder(
   setFields: (fields: Field[]) => void,
   setData: (data: any[]) => void,
   setError: (error: string | null) => void,
-  setAvailableColumns: React.Dispatch<React.SetStateAction<{[key: string]: string[]}>>
+  setAvailableColumns: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>
 ) {
-  
   async function checkConnection() {
     try {
       const response = await fetch('/api/tables');
@@ -97,49 +96,48 @@ export function useQueryBuilder(
     return { combinator: ruleGroup.combinator, rules: processedRules };
   }
 
-  async function executeQuery(selectedTable: string, query: RuleGroupType, joins: JoinConfig[]) {
+ 
+  async function executeQuery(
+    selectedTable: string, 
+    selectedColumns: { table: string; column: string; alias: string }[], 
+    query: RuleGroupType, 
+    joins: JoinConfig[]
+  ) {
     setError(null);
-    setData([]); 
+    setData([]);
+    
     try {
       const processedQuery = processQueryRules(query);
-     
+
+      
       const response = await fetch('/api/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          table: selectedTable,
+        body: JSON.stringify({ 
+          table: selectedTable, 
           query: processedQuery,
-          joins: joins
+          joins: joins,
+          selectedColumns: selectedColumns 
         })
       });
+      
+      console.log("Request body:", { 
+        table: selectedTable, 
+        query: processedQuery, 
+        joins, 
+        selectedColumns 
+      }); 
 
       const result = await response.json();
-      
-      if (result.success === false) {
-        const errorMessage = result.userMessage || 'Query syntax error. Please check your query.';
-        setError(errorMessage);
-        
 
-        if (result.devMessage) {
-          console.error('Query Error Details:', result.devMessage);
-        }
-        return; 
-      }
-
-      if (!response.ok) {
-        const errorMessage = result.error || result.userMessage || 'Query failed';
-        setError(errorMessage);
-        console.error('Query error:', result);
+      if (!response.ok || result.success === false) {
+        setError(result.userMessage || 'Query error');
+        console.error('Query error details:', result.devMessage || result);
         return;
       }
 
       setData(result.data || []);
-      
-      if (result.data && result.data.length === 0) {
-        console.log('Query executed successfully but no results found');
-      } else {
-        console.log('Query executed successfully. Results:', result.count);
-      }
+
     } catch (err: any) {
       setError('Network error: Unable to execute query');
       console.error('Query execution error:', err);
@@ -161,5 +159,5 @@ export function useQueryBuilder(
     loadTables,
     loadTableColumns,
     executeQuery
-  };
+  }
 }
