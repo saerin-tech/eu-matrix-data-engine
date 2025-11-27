@@ -120,13 +120,6 @@ export function useQueryBuilder(
           selectedColumns: selectedColumns 
         })
       });
-      
-      console.log("Request body:", { 
-        table: selectedTable, 
-        query: processedQuery, 
-        joins, 
-        selectedColumns 
-      }); 
 
       const result = await response.json();
 
