@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RuleGroupType, Field } from 'react-querybuilder';
 import Header from './components/Header';
-import ConnectionStatus from './components/ConnectionStatus';
 import TableSelector from './components/TableSelector';
 import QueryBuilderSection from './components/QueryBuilderSection';
 import JoinModal from './components/JoinModal';
@@ -60,7 +59,6 @@ export default function Page() {
     executeQuery: runQuery 
   } = useQueryBuilder(setConnectionStatus, setTables, setFields, setData, setError, setAvailableColumns);
 
-  // Check authentication
   useEffect(() => {
     const userId = sessionStorage.getItem('userId');
     const userName = sessionStorage.getItem('userName');
@@ -205,7 +203,7 @@ export default function Page() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen from-gray-900 to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
           <p className="text-gray-300">Checking authentication...</p>
@@ -219,7 +217,7 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-5 max-w-[1400px] mx-auto">
+    <div className="min-h-screen flex flex-col p-3 sm:p-5 max-w-[1400px] mx-auto">
       
       <Header 
         userEmail={userEmail}
@@ -227,8 +225,9 @@ export default function Page() {
         organizationName={process.env.NEXT_PUBLIC_ORGANIZATION}
       />
       
-      {connectionStatus === 'connected' && (
-        <div className='flex-1'>
+    <main className="flex-grow">
+      {connectionStatus === 'connected' ? (
+        <>
           <TableSelector
             tables={tables}
             selectedTable={selectedTable}
@@ -236,6 +235,9 @@ export default function Page() {
             loading={loadingTables}
             onTableChange={setSelectedTable}
             onRefresh={handleLoadTables}
+            onOpenJoinModal={handleOpenJoinModal}
+            joins={joins}
+            onRemoveJoin={handleRemoveJoin}
           />
 
           {selectedTable && fields.length > 0 && (
@@ -245,21 +247,13 @@ export default function Page() {
               joins={joins}
               selectedTable={selectedTable}
               loading={loadingColumns}
+              queryExecuting={loadingQuery}
               onQueryChange={setQuery}
-              onOpenJoinModal={handleOpenJoinModal}
               onRemoveJoin={handleRemoveJoin}
               onColumnsChange={setSelectedColumns} 
-            />
-          )}
-
-          {selectedTable && (
-            <div className="mb-5">
-              <ExecuteButton
-                loading={loadingQuery}
-                disabled={loadingQuery || !selectedTable}
-                onClick={handleExecuteQuery}
+                onExecuteQuery={handleExecuteQuery}
+                executeDisabled={loadingQuery || !selectedTable}
               />
-            </div>
           )}
 
           <ErrorAlert message={error} />
@@ -290,9 +284,18 @@ export default function Page() {
             onTargetTableChange={handleTargetTableChange}
             onAdd={handleAddJoin}
           />
-        </div>
-      )}
-      <Footer/>
+          </>
+        ) : (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+              <p className="text-gray-300">Connecting to database...</p>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 }
