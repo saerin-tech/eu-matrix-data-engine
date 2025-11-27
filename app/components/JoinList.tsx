@@ -15,7 +15,7 @@ export default function JoinList({ joins, selectedTable, onRemove }: Props) {
       {joins.map((join, index) => (
         <div 
           key={index} 
-          className="p-3 bg-blue-50 rounded-md border border-blue-200 flex justify-between items-center flex-wrap gap-2"
+          className="p-2 bg-blue-50 rounded-md border border-blue-200 flex justify-between items-center flex-wrap gap-2 mt-5"
         >
           <span className="text-gray-800 text-sm font-mono">
             <strong className="text-blue-700">{join.type}</strong> {join.targetTable}
