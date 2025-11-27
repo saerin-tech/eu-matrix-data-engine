@@ -45,10 +45,10 @@ export default function Header({ userEmail, onLogout, organizationName }: Header
 
             <button
               onClick={onLogout}
-              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-red-600/30 hover:shadow-red-600/50 active:scale-95 border border-red-500/20"
+              className="px-4 cursor-pointer sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-red-600/30 hover:shadow-red-600/50 active:scale-95 border border-red-500/20"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
         </div>
@@ -90,10 +90,10 @@ export default function Header({ userEmail, onLogout, organizationName }: Header
 
             <button
             onClick={onLogout}
-            className="w-full px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center justify-center gap-2 text-sm font-semibold shadow-lg"
+            className="w-full px-4 cursor-pointer py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center justify-center gap-2 text-sm font-semibold shadow-lg"
             >
             <LogOut className="w-4 h-4" />
-            Logout
+            Sign out
             </button>
         </div>
         )}

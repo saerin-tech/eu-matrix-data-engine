@@ -34,7 +34,7 @@ export default function QueryBuilderSection({
 }: Props) {
 
   return (
-    <div className="min-h-[300px] sm:min-h-[490px] border border-gray-300 rounded-lg p-3 sm:p-5 mb-4 sm:mb-5 bg-white">
+    <div className="min-h-[320px] sm:min-h-[490px] border border-gray-300 rounded-lg p-3 sm:p-5 mb-4 sm:mb-5 bg-white">
       <div className="flex justify-between items-center mb-3 sm:mb-4 flex-wrap gap-2">
         <h2 className="m-0 text-sm sm:text-md font-semibold text-gray-800">
           Select the columns and filters you would like to visualise in the database
@@ -75,6 +75,11 @@ export default function QueryBuilderSection({
             onQueryChange={onQueryChange}
             controlClassnames={{
             ruleGroup: "min-h-[300px] sm:min-h-[400px] max-h-[300px] sm:max-h-[400px] bg-slate-800/50 p-3 sm:p-4 rounded-lg border border-slate-700 overflow-y-auto text-sm",
+            removeRule: "ml-auto text-xs px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white",
+            operators: "min-w-[150px] bg-slate-900 text-slate-100 border border-slate-600 rounded px-2 py-1",
+            value: "bg-slate-900 text-slate-200 border border-slate-600 rounded px-2 py-1 min-w-[150px]",
+
+
           }}
             translations={{
               addRule: { label: "Add Filter" },
