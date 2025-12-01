@@ -4,6 +4,7 @@ import { Loader } from 'lucide-react';
 import ExecuteButton from './ExecuteButton';
 import { JoinConfig } from '../types';
 import 'react-querybuilder/dist/query-builder.css';
+import CustomFieldSelector from "./CustomFieldSelector";
 
 interface Props {
   fields: Field[];
@@ -18,6 +19,16 @@ interface Props {
   onExecuteQuery: () => void;
   executeDisabled: boolean;
 }
+
+const customOperators = [
+  { name: "=", label: "is equal to" },
+  { name: ">", label: "is higher than" },
+  { name: "<", label: "is lower than" },
+  { name: "contains", label: "includes the following word:" },
+  { name: "does not contain", label: "doesn't include the following word:" },
+  { name: "is null", label: "is empty" },
+  { name: "is not null", label: "is not empty" },
+];
 
 export default function QueryBuilderSection({
   fields,
@@ -73,6 +84,9 @@ export default function QueryBuilderSection({
             fields={fields} 
             query={query} 
             onQueryChange={onQueryChange}
+            operators={customOperators}
+            controlElements={{
+            fieldSelector: CustomFieldSelector,}}
             controlClassnames={{
             ruleGroup: "min-h-[300px] sm:min-h-[400px] max-h-[300px] sm:max-h-[400px] bg-slate-800/50 p-3 sm:p-4 rounded-lg border border-slate-700 overflow-y-auto text-sm",
             removeRule: "ml-auto text-xs px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white",
@@ -83,7 +97,7 @@ export default function QueryBuilderSection({
           }}
             translations={{
               addRule: { label: "Add Filter" },
-              addGroup: { label: "Add New Group" },
+              addGroup: { label: "Add New Group of Filter" },
             }}
           />
         </div>

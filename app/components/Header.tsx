@@ -5,9 +5,10 @@ interface HeaderProps {
   userEmail: string;
   onLogout: () => void;
   organizationName?: string;
+  organizationSubHeading?: string
 }
 
-export default function Header({ userEmail, onLogout, organizationName }: HeaderProps) {
+export default function Header({ userEmail, onLogout, organizationName, organizationSubHeading }: HeaderProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   return (
@@ -27,7 +28,7 @@ export default function Header({ userEmail, onLogout, organizationName }: Header
               <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent tracking-tight">
                 {organizationName || "Query Craft Engine"}
               </h1>
-              <p className="text-xs text-gray-400 mt-0.5 hidden lg:block">Advanced Database Query Builder</p>
+              <p className="text-xs text-gray-400 mt-0.5 hidden lg:block">{organizationSubHeading || "Advanced Database Query Builder" }</p>
             </div>
           </div>
 

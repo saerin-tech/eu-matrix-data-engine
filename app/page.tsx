@@ -223,6 +223,7 @@ export default function Page() {
         userEmail={userEmail}
         onLogout={handleLogout}
         organizationName={process.env.NEXT_PUBLIC_ORGANIZATION}
+        organizationSubHeading={process.env.NEXT_PUBLIC_ORGANIZATION_SUB_HEADING}
       />
       
     <main className="flex-grow">
