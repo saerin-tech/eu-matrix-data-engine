@@ -42,9 +42,6 @@ export default function CustomFieldSelector({
         setIsOpen(false);
         setSearchTerm('');
     };
-    const onOptionClick = (name: string) => {
-        return () => handleOptionSelect(name);
-        };
 
     const stopPropagation = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -102,7 +99,7 @@ export default function CustomFieldSelector({
                             filteredOptions?.map((option) => (
                                 <div
                                     key={option.name}
-                                    onClick={() => onOptionClick(option.name)}
+                                    onClick={() => handleOptionSelect(option.name)}
                                     className={`px-2 py-1.5 cursor-pointer text-sm ${value === option.name ? 'bg-gray-100' : 'hover:bg-gray-50'
                                         }`}
                                 >
