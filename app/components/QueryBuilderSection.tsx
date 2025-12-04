@@ -5,6 +5,7 @@ import ExecuteButton from './ExecuteButton';
 import { JoinConfig } from '../types';
 import 'react-querybuilder/dist/query-builder.css';
 import CustomFieldSelector from "./CustomFieldSelector";
+import CustomValueEditor from "./CustomValueEditor";
 
 interface Props {
   fields: Field[];
@@ -58,7 +59,7 @@ export default function QueryBuilderSection({
           <div className='hidden lg:flex lg:justify-between gap-3 mb-4'>
             <div className='w-[37%]'>
               <h2 className="m-0 text-base font-semibold text-gray-800">
-                Select the columns...
+                Select the columns you would like to visualise
               </h2>
             </div>
             <div className='w-[60%]'>
@@ -74,7 +75,7 @@ export default function QueryBuilderSection({
         <div className='w-full lg:w-[37%] flex flex-col'>
               {/* MOBILE ONLY: Column Heading */}
               <h2 className="lg:hidden m-0 mb-3 text-sm font-semibold text-gray-800">
-                Select the columns...
+                Select the columns you would like to visualise
               </h2>
 
           <ColumnSelector
@@ -106,7 +107,8 @@ export default function QueryBuilderSection({
             onQueryChange={onQueryChange}
             operators={customOperators}
             controlElements={{
-            fieldSelector: CustomFieldSelector,}}
+            fieldSelector: CustomFieldSelector,
+              valueEditor: CustomValueEditor,}}
             controlClassnames={{
             ruleGroup: "min-h-[300px] lg:min-h-[400px] max-h-[300px] lg:max-h-[400px] bg-slate-800/50 p-3 lg:p-4 rounded-lg border border-slate-700 overflow-y-auto text-sm",
             removeRule: "ml-auto text-xs px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white",
