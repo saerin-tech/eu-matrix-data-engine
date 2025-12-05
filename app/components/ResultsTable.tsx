@@ -141,7 +141,7 @@ export default function ResultsTable({
   const currentData = data.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="border border-gray-300 rounded-lg mb-5 bg-white overflow-hidden">
+    <div className="border border-gray-300 rounded-lg mb-5 bg-white overflow-hidden px-5">
       <div className="p-8 border-b border-gray-300 bg-gray-50 flex justify-between items-center flex-wrap gap-4">
         <h2 className="m-0 text-xl font-semibold text-gray-800">
           Results ({data.length} total records)
@@ -159,7 +159,7 @@ export default function ResultsTable({
       </div>
 
       <div className="overflow-x-auto max-w-full ">
-        <table className="w-full border-collapse min-w-[600px]">
+        <table className="w-full border-collapse min-w-[600px] border-2">
           <thead>
             <tr className="bg-gray-50">
               {columns?.map((column, index) => (
