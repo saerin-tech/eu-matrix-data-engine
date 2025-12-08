@@ -1,5 +1,8 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { UserPlus, Loader, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
+import TextInput from "./TextInput";
+import SelectInput from "./SelectInput";
+import SubmitButton from "./SubmitButton";
 
 type UserRole = 'Admin' | 'User' | "";
 
@@ -42,10 +45,12 @@ export default function CreateUserForm({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // VALIDATION: Check if all mandatory fields are filled
+  const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   useEffect(() => {
     const { first_name, last_name, user_name, user_password, confirm_password, roles_and_rights } = formData;
-    
     const isValid = 
       first_name.trim().length > 0 &&
       last_name.trim().length > 0 &&
@@ -61,9 +66,9 @@ export default function CreateUserForm({
   // NEW: Handle contact input with max 11 digits
   function handleContactChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
-    // Only allow numbers and max 11 digits
+
     if (value === '' || (/^\d+$/.test(value) && value.length <= 11)) {
-      setFormData({ ...formData, contact: value });
+      updateField('contact', value);
     }
   }
 
@@ -111,8 +116,7 @@ export default function CreateUserForm({
       const result = await response.json();
 
       if (result.success) {
-        setSuccess(result.message);
-        // Reset form
+        setSuccess(result.message || 'User created successfully!');
         setFormData({
           first_name: '',
           last_name: '',
@@ -124,7 +128,7 @@ export default function CreateUserForm({
         });
         onSuccess?.();
       } else {
-        setError(result.message);
+        setError(result.message || 'Failed to create user');
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -135,196 +139,96 @@ export default function CreateUserForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* First Name - MANDATORY */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          First Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
+      <TextInput
+        label="First Name"
+        required
           value={formData.first_name}
-          onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-          required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
+          onChange={(e) => updateField('first_name', e.target.value)}
           placeholder="Enter first name"
         />
-      </div>
 
-      {/* Last Name - MANDATORY */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          Last Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
+      <TextInput
+        label="Last Name"
+        required
           value={formData.last_name}
-          onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-          required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
+          onChange={(e) => updateField('last_name', e.target.value)}
           placeholder="Enter last name"
         />
-      </div>
 
-      {/* Username - MANDATORY */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          User Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={formData.user_name}
-          onChange={(e) => setFormData({ ...formData, user_name: e.target.value })}
+      <TextInput
+        label="User Name"
           required
           minLength={3}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
+        value={formData.user_name}
+        onChange={(e) => updateField('user_name', e.target.value)}
           placeholder="Enter username (min 3 characters)"
         />
-         <p className="mt-1 text-xs text-gray-500">
-          UserName must be at least 3 characters
-        </p> 
-      </div>
 
-      {/* Contact : OPTIONAL Max 11 digits */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          Contact <span className="text-gray-400 text-xs">(Optional)</span>
-        </label>
-        <input
+      <TextInput
+        label="Contact"
           type="text"
-          inputMode="numeric"
+        showCount
+        maxLength={11}
           value={formData.contact}
           onChange={handleContactChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
-          placeholder="Enter contact number (max 11 digits)"
+          placeholder="Enter contact number (optional)"
         />
-        <p className="mt-1 text-xs text-gray-500">
-          {formData.contact.length}/11 digits
-        </p>
-      </div>
 
-      {/* Role - MANDATORY */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          Role / Rights <span className="text-red-500">*</span>
-        </label>
-        <select
+      <SelectInput
+        label="Role"
+        required
           value={formData.roles_and_rights}
-          onChange={(e) => setFormData({ ...formData, roles_and_rights: e.target.value as UserRole })}
+          onChange={(e) => updateField('roles_and_rights', e.target.value as UserRole)}
+        options={[
+          { label: "User", value: "User" },
+          { label: "Admin", value: "Admin" }
+        ]}
+      />
+
+      <TextInput
+        label="Password"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
-        >   
-          <option disabled value="">Select Role</option>
-          <option value="User">User</option>
-          <option value="Admin">Admin</option>
-        </select>
-      </div>
-
-      {/* Password - MANDATORY - NEW: Eye icon toggle */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          Password <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
             value={formData.user_password}
-            onChange={(e) => setFormData({ ...formData, user_password: e.target.value })}
-            required
+        placeholder="Enter password (min 6 characters)"
             minLength={6}
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
-            placeholder="Enter password (min 6 characters)"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-          >
-            {showPassword ? (
-              <EyeOff className="w-5 h-5" />
-            ) : (
-              <Eye className="w-5 h-5" />
-            )}
-          </button>
-        </div>
-        <p className="mt-1 text-xs text-gray-500">
-          Password must be at least 6 characters
-        </p> 
-      </div>
+        onChange={(e) => updateField('user_password', e.target.value)}
+        showPasswordToggle
+        isPasswordVisible={showPassword}
+        onTogglePassword={() => setShowPassword(!showPassword)}
+      />
 
-      {/* Confirm Password - MANDATORY - NEW: Eye icon toggle */}
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          Confirm Password <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type={showConfirmPassword ? "text" : "password"}
+      <TextInput
+        label="Confirm Password"
+        required
             value={formData.confirm_password}
-            onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
-            required
+        placeholder="Confirm password"
             minLength={6}
-            className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-gray-700 ${
-              formData.confirm_password && formData.user_password !== formData.confirm_password
-                ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300 focus:ring-blue-500'
-            }`}
-            placeholder="Confirm password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-          >
-            {showConfirmPassword ? (
-              <EyeOff className="w-5 h-5" />
-            ) : (
-              <Eye className="w-5 h-5" />
-            )}
-          </button>
-        </div>
-        {formData.confirm_password && formData.user_password !== formData.confirm_password && (
-          <p className="mt-1 text-xs text-red-600">Passwords do not match</p>
-        )}
-      </div>
+        onChange={(e) => updateField('confirm_password', e.target.value)}
+        showPasswordToggle
+        isPasswordVisible={showConfirmPassword}
+        onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
+      />
 
-      {/* Error Message */}
+      {success && (
+        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm flex items-center gap-2">
+          <CheckCircle className="w-4 h-4" />
+          {success}
+        </div>
+        )}
+
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4" />
           {error}
         </div>
       )}
 
-      {/* Success Message */}
-      {success && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 flex-shrink-0" />
-          {success}
-        </div>
-      )}
-
-      {/* Submit Button - DISABLED until form is valid */}
-      <button
-        type="submit"
-        disabled={loading || !isFormValid}
-        className={`w-full px-6 py-3 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors ${
-          loading || !isFormValid
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700'
-        }`}
-      >
-        {loading ? (
-          <>
-            <Loader className="w-5 h-5 animate-spin" />
-            Creating User...
-          </>
-        ) : (
-          <>
-            <UserPlus className="w-5 h-5" />
-            Create User
-          </>
-        )}
-      </button>
+      <SubmitButton
+        loading={loading}
+        disabled={!isFormValid}
+        text="Create User"
+        icon={<UserPlus className="w-5 h-5" />}
+      />
     </form>
   );
 }

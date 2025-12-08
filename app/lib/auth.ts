@@ -48,7 +48,6 @@ export async function seedUser(): Promise<AuthResponse> {
           user_name: defaultUserName,
           user_password: hashedPassword,
           roles_and_rights: 'Admin',
-          created_at: new Date().toISOString()
         }
       ])
       .select()
@@ -124,6 +123,7 @@ export async function validateLogin(user_name: string, user_password: string): P
       }
     };
   } catch (error: any) {
+    console.error('Login error:', error.message);
     return {
       success: false,
       message: 'Login failed. Please try again.'
@@ -134,10 +134,9 @@ export async function createUser(
   first_name: string,      
   last_name: string,       
   user_name: string,       
-  contact: number | null,  
+  contact: string | null,  
   user_password: string,   
   roles_and_rights: UserRole, 
-  creatorRole: UserRole,   
   created_by: string       
 ): Promise<AuthResponse> {
   try {
@@ -161,14 +160,13 @@ export async function createUser(
       .from('users')
       .insert([
         {
-          first_name: first_name.trim(),
-          last_name: last_name.trim(),
-          user_name: user_name.trim(),
-          contact: contact || null,
+          first_name,
+          last_name,
+          user_name,
+          contact,
           user_password: hashedPassword,
           roles_and_rights,
           created_by,             
-          created_at: new Date().toISOString()
         }
       ])
       .select()
@@ -176,7 +174,7 @@ export async function createUser(
 
     if (error || !newUser) {
       console.error('Failed to create user:', error?.message);
-      return { success: false, message: 'Failed to create user' };
+      return { success: false, message: error?.message || 'Failed to create user' };
     }
 
     return {

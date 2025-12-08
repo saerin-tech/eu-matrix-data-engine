@@ -5,10 +5,9 @@ interface CreateUserRequest {
   first_name: string;       
   last_name: string;        
   user_name: string;        
-  contact: number | null;   
+  contact: string | null;   
   roles_and_rights: UserRole; 
   user_password: string;    
-  creator_role: UserRole;   
   created_by: string;      
 }
 
@@ -22,12 +21,11 @@ export async function POST(request: NextRequest) {
       contact, 
       roles_and_rights, 
       user_password, 
-      creator_role,
       created_by 
     } = body;
 
     // Validate mandatory fields
-    if (!first_name || !last_name || !user_name || !user_password || !roles_and_rights || !creator_role || !created_by) {
+    if (!first_name || !last_name || !user_name || !user_password || !roles_and_rights || !created_by) {
       return NextResponse.json(
         { success: false, message: 'All mandatory fields are required' },
         { status: 400 }
@@ -36,20 +34,19 @@ export async function POST(request: NextRequest) {
 
     // createUser with all fields
     const result = await createUser(
-      first_name.trim(),
-      last_name.trim(),
-      user_name.trim(),
+      first_name,
+      last_name,
+      user_name,
       contact || null ,
       user_password,
       roles_and_rights,
-      creator_role,
       created_by
     );
 
     if (result.success) {
       return NextResponse.json(result);
     } else {
-      return NextResponse.json(result, { status: 403 });
+      return NextResponse.json(result, { status: 400 });
     }
   } catch (error) {
     console.error('Create user API error:', error);

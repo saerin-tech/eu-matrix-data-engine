@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     const supabase = createServerClient();
     const sqlQuery = buildSQL(table, query, joins, selectedColumns);
-
+    const isDebugMode = process.env.NEXT_PUBLIC_DEBUG_MODE == 'true';
 
     try {
       const { data, error } = await supabase.rpc("execute_dynamic_query", {
@@ -57,7 +57,8 @@ export async function POST(request: Request) {
         table, 
         count: data?.length || 0, 
         data, 
-        hasJoins: joins.length > 0 
+        hasJoins: joins.length > 0,
+        sqlQuery : isDebugMode? sqlQuery : null
       });
     } catch (err: any) {
       console.error("FATAL ERROR →", err);

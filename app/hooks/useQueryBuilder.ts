@@ -126,14 +126,19 @@ export function useQueryBuilder(
       if (!response.ok || result.success === false) {
         setError(result.userMessage || 'Query error');
         console.error('Query error details:', result.devMessage || result);
-        return;
+        return null;
+      }
+      if(result.sqlQuery){
+        console.log(result.sqlQuery, "Result query");
       }
 
       setData(result.data || []);
+      return result;
 
     } catch (err: any) {
       setError('Network error: Unable to execute query');
       console.error('Query execution error:', err);
+      return null;
     }
   }
 

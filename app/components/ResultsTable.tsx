@@ -28,8 +28,6 @@ export default function ResultsTable({
     if (data.length === 0) return;
     
     setIsExporting(true);
-    console.log("excle js file")
-    
     try {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Results');

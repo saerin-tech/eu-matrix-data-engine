@@ -105,10 +105,8 @@ export default function CustomValueEditor({
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
-        console.log(fieldData?.dataType, isNumericField);
         // Validate numeric input
         if (isNumericField && newValue !== '' && newValue !== '-') {
-            console.log(fieldData?.dataType, isNumericField, "---");
             if (!/^-?\d*\.?\d*$/.test(newValue)) return;
         }
 
