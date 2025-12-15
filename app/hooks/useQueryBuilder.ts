@@ -1,6 +1,10 @@
 import { RuleGroupType, Field } from 'react-querybuilder';
 import { JoinConfig, ConnectionStatus } from '../types';
 
+interface ExtendedField extends Field {
+  dataType?: string;
+}
+
 export function useQueryBuilder(
   setConnectionStatus: (status: ConnectionStatus) => void,
   setTables: (tables: string[]) => void,
@@ -63,6 +67,7 @@ export function useQueryBuilder(
         name: `${tableName}.${col.name}`,
         label: `${tableName}.${col.name}`,
         inputType: mapPostgresType(col.type),
+        dataType: col.type,
       }));
       
       setFields(newFields);

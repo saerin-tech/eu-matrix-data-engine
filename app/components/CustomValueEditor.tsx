@@ -19,6 +19,7 @@ export default function CustomValueEditor({
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
 
+    const columnType = fieldData?.dataType || 'text';
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -55,12 +56,13 @@ export default function CustomValueEditor({
         setLoading(true);
 
         try {
-            const response = await fetch('/api/column-values', {
+            const response = await fetch('/api/sql-api', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     tableName,
                     columnName,
+                    columnType,
                     searchTerm: term,
                 }),
             });
