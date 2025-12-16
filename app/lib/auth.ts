@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { AuthResponse } from '../types/auth';
 import bcrypt from 'bcryptjs';
+import { autoDeployRPCFunctions } from './deploy-rpc';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -124,7 +125,10 @@ export async function validateLogin(user_name: string, user_password: string): P
         message: 'Your account has been disabled. Please contact your administrator.'
       };
     }
-
+    if(user.user_name && isPasswordValid && user.is_enabled){
+      await autoDeployRPCFunctions()
+        console.log("rpc function deployed seccfully, ");
+    }       
     return {
       success: true,
       message: 'Login successful',
