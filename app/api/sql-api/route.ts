@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { tableName, columnName, columnType, searchTerm = '' } = body
+    const { tableName, columnName, searchTerm = '' } = body
 
     //     Validation
     if (!tableName || !columnName) {
@@ -62,7 +62,6 @@ export async function POST(request: NextRequest) {
       values,
       tableName,
       column: columnName,
-      columnType,
       searchTerm
     })
 

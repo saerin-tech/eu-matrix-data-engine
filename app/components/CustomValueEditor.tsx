@@ -19,7 +19,6 @@ export default function CustomValueEditor({
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const columnType = fieldData?.dataType || 'text';
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +61,6 @@ export default function CustomValueEditor({
                 body: JSON.stringify({
                     tableName,
                     columnName,
-                    columnType,
                     searchTerm: term,
                 }),
             });

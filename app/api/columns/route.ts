@@ -32,7 +32,6 @@ export async function POST(request: Request) {
     // Column details return
     const columns = data?.map((col: any) => ({
       name: col.column_name,
-      type: col.data_type,
       nullable: col.is_nullable
     })) || []
     

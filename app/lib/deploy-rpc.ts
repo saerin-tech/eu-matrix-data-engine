@@ -2,21 +2,12 @@ import fs from 'fs'
 import path from 'path'
 import { Pool } from 'pg';
 
-let deploymentStatus: 'pending' | 'deployed' | 'failed' = 'pending'
-let lastError: string | null = null
 
 export async function autoDeployRPCFunctions(databaseUrl?: string): Promise<{
   success: boolean
   message: string
   alreadyDeployed: boolean
 }> {
-  if (deploymentStatus === 'deployed') {
-    return {
-      success: true,
-      message: 'RPC functions already deployed',
-      alreadyDeployed: true
-    }
-  }
 
   const dbUrl = databaseUrl || process.env.DATABASE_URL;
   if (!dbUrl) {
@@ -43,8 +34,6 @@ export async function autoDeployRPCFunctions(databaseUrl?: string): Promise<{
     const sql = fs.readFileSync(sqlPath, 'utf-8');
      await pool.query(sql);
     
-    deploymentStatus = 'deployed'
-    lastError = null
     console.log('SUCCESS: All RPC functions deployed in Database')
 
     return {
@@ -54,8 +43,6 @@ export async function autoDeployRPCFunctions(databaseUrl?: string): Promise<{
     }
 
   } catch (error: any) {
-    deploymentStatus = 'failed'
-    lastError = error.message
     console.error('FAILED:', error.message)
     return {
       success: false,
@@ -67,6 +54,3 @@ export async function autoDeployRPCFunctions(databaseUrl?: string): Promise<{
   }
 }
 
-export function getDeploymentStatus() {
-  return { status: deploymentStatus, error: lastError }
-}
