@@ -55,7 +55,7 @@ export default function CustomValueEditor({
         setLoading(true);
 
         try {
-            const response = await fetch('/api/column-values', {
+            const response = await fetch('/api/sql-api', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

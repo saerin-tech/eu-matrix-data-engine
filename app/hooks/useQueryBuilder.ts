@@ -1,6 +1,7 @@
 import { RuleGroupType, Field } from 'react-querybuilder';
 import { JoinConfig, ConnectionStatus } from '../types';
 
+
 export function useQueryBuilder(
   setConnectionStatus: (status: ConnectionStatus) => void,
   setTables: (tables: string[]) => void,

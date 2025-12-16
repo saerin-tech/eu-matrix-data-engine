@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '../../lib/supabase-server'
+import { createServerClient } from '../../lib/supabase'
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     
     // Supabase RPC call for columns
     const { data, error } = await supabase.rpc('get_table_columns', { 
-      table_name: tableName 
+      tbl_name: tableName 
     })
     
     if (error) {
@@ -32,8 +32,7 @@ export async function POST(request: Request) {
     // Column details return
     const columns = data?.map((col: any) => ({
       name: col.column_name,
-      type: col.data_type,
-      nullable: col.is_nullable === 'YES'
+      nullable: col.is_nullable === "Yes"
     })) || []
     
     return NextResponse.json({ 
