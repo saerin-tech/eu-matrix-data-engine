@@ -8,7 +8,7 @@ import { User, UpdateUserData, UserRole } from '../../types/user';
 interface EditUserModalProps {
   user: User;
   onClose: () => void;
-  onUpdate: (userId: string, data: UpdateUserData) => Promise<void>;
+  onUpdate: (userId: string, data: Partial<UpdateUserData>) => Promise<void>;
 }
 
 
@@ -31,6 +31,31 @@ export default function EditUserModal({ user, onClose, onUpdate }: EditUserModal
     }
   };
 
+  // Get only changed fields
+  const getChangedFields = (): Partial<UpdateUserData> => {
+    const changes: Partial<UpdateUserData> = {};
+
+    if (formData.first_name !== user.first_name) {
+      changes.first_name = formData.first_name;
+    }
+
+    if (formData.last_name !== user.last_name) {
+      changes.last_name = formData.last_name;
+    }
+
+    const normalizedContact = formData.contact || null;
+    const originalContact = user.contact || null;
+    if (normalizedContact !== originalContact) {
+      changes.contact = normalizedContact;
+    }
+
+    if (formData.roles_and_rights !== user.roles_and_rights) {
+      changes.roles_and_rights = formData.roles_and_rights;
+    }
+
+    return changes;
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +63,17 @@ export default function EditUserModal({ user, onClose, onUpdate }: EditUserModal
     setError(null);
 
     try {
-      await onUpdate(user.id, {
-        ...formData,
-        contact: formData.contact || null
-      });
+      const changes = getChangedFields();
+
+      // Check if there are any changes
+      if (Object.keys(changes).length === 0) {
+        setError('No changes detected');
+        setLoading(false);
+        return;
+      }
+
+      // Only send changed fields
+      await onUpdate(user.id, changes);
       onClose();
     } catch (err) {
       setError('Failed to update user. Please try again.');

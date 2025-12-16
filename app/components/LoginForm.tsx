@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { LogIn, AlertCircle } from 'lucide-react';
+import { LogIn, AlertCircle, Lock } from 'lucide-react';
 import Button from './shared/Button';
 import Input from './shared/Input';
 
@@ -19,11 +19,13 @@ export default function LoginForm({ onLoginSuccess }: Props) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAccountDisabled, setIsAccountDisabled] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setIsAccountDisabled(false);
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -41,6 +43,10 @@ export default function LoginForm({ onLoginSuccess }: Props) {
           result.user.roles_and_rights
         );
       } else {
+        // Check if account is disabled (403 status)
+        if (response.status === 403) {
+          setIsAccountDisabled(true);
+        }
         setError(result.message || 'Login failed');
       }
     } catch (err) {
@@ -60,9 +66,9 @@ export default function LoginForm({ onLoginSuccess }: Props) {
           required
           placeholder="Enter username"
         autoComplete="username"
+         disabled={loading}
       />
 
-      {/* Password Input with Toggle */}
       <Input
         label="Password"
         type="password"
@@ -72,13 +78,27 @@ export default function LoginForm({ onLoginSuccess }: Props) {
         placeholder="Enter password"
         showPasswordToggle
         autoComplete="current-password"
+         disabled={loading}
       />
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
-          {error}
+        <div className={`p-3 border rounded-lg text-sm flex items-start gap-3 ${
+            isAccountDisabled 
+              ? 'bg-orange-50 border-orange-200 text-orange-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            {isAccountDisabled ? (
+              <Lock className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            )}
+          <div>
+            <p className="font-semibold">
+              {isAccountDisabled ? 'Account Disabled' : 'Login Failed'}
+            </p>
+            <p className="text-xs mt-1">{error}</p>
+          </div>
         </div>
       )}
 

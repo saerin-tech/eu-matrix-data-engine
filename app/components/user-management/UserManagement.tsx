@@ -59,20 +59,17 @@ export default function UserManagement() {
       const response = await fetch('/api/users/toggle-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId, 
-          isEnabled: currentStatus ?? false 
-        })
+        body: JSON.stringify({ userId, isEnabled: currentStatus })
       });
 
       const result = await response.json();
       
-      if (result.success && result.user) {
-        setUsers(prev =>
-            prev.map(u =>
-            u.id === userId
-                ? { ...u, is_enabled: result.user.is_enabled }
-                : u
+      if (result.success) {
+        setUsers(prevUsers =>
+            prevUsers.map(user => 
+            user.id === userId 
+                ? { ...user, is_enabled: result.data.isEnabled }
+                : user
             )
         );
         }
@@ -82,7 +79,7 @@ export default function UserManagement() {
   };
 
   // User update
-  const handleUpdateUser = async (userId: string, data: UpdateUserData) => {
+  const handleUpdateUser = async (userId: string, data: Partial<UpdateUserData>) => {
     const response = await fetch('/api/users/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

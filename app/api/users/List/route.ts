@@ -84,14 +84,13 @@ export async function GET(request: NextRequest) {
 
   } catch (err) {
     console.error('API Error:', err);
-    const errorMessage = err instanceof Error ? err.message : 'Internal server error';
     
     return NextResponse.json<UsersResponse>(
       {
         success: false,
         users: [],
         meta: { currentPage: 1, itemsPerPage: 10, totalItems: 0, totalPages: 0 },
-        message: errorMessage
+        message: err instanceof Error ? err.message : 'Internal server error'
       },
       { status: 500 }
     );

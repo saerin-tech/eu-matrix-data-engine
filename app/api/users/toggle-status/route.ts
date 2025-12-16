@@ -2,86 +2,61 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '../../../lib/supabase';
 import { ApiResponse } from '../../../types/user';
 
-interface ToggleStatusRequest {
-  userId: string;
-  isEnabled: boolean | string;
-}
-
 export async function POST(request: Request) {
   try {
-    const body: ToggleStatusRequest = await request.json();
-    const { userId, isEnabled } = body;
-    
-    // Validation - check userId first
+    const { userId, isEnabled } = await request.json();
+
     if (!userId) {
       return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          message: 'User ID is required'
-        },
-        { status: 400 }
-      );
-    }
-
-    // Convert to boolean
-    let isEnabledBool: boolean;
-    if (typeof isEnabled === 'string') {
-      isEnabledBool = isEnabled === 'true';
-    } else if (typeof isEnabled === 'boolean') {
-      isEnabledBool = isEnabled;
-    } else {
-      return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          message: 'Invalid status value'
-        },
+        { success: false, message: 'User ID is required' },
         { status: 400 }
       );
     }
 
     const supabase = createServerClient();
+    const numericUserId = typeof userId === 'string' ? parseInt(userId) : userId;
+    
+    if (isNaN(numericUserId)) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, message: 'Invalid user ID' },
+        { status: 400 }
+      );
+    }
 
-    const newStatus = !isEnabledBool;
+    //  Simple boolean toggle - no string conversion!
+    const newStatus = !isEnabled;
 
-    // Update user status
     const { data, error } = await supabase
       .from('users')
       .update({ is_enabled: newStatus })
-      .eq('id', userId)
-      .select()
-      .single();
+      .eq('id', numericUserId)
+      .select();
 
     if (error) {
-      console.error('Update error:', error);
+      console.error('Database update error:', error);
       return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          message: 'Failed to update user status',
-        },
+        { success: false, message: 'Failed to update user status' },
         { status: 500 }
+      );
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, message: 'User not found' },
+        { status: 404 }
       );
     }
 
     return NextResponse.json<ApiResponse>({
       success: true,
       message: `User ${newStatus ? 'enabled' : 'disabled'} successfully`,
-      user: {
-        ...data,
-        is_enabled: typeof data.is_enabled === 'string' 
-          ? data.is_enabled === 'true' 
-          : data.is_enabled
-      }
+      data: { isEnabled: newStatus }
     });
 
   } catch (err) {
-    console.error('API Error:', err);
-    const errorMessage = err instanceof Error ? err.message : 'Internal server error';
-    
+    console.error('Toggle API error:', err);
     return NextResponse.json<ApiResponse>(
-      {
-        success: false,
-        message: errorMessage
-      },
+      { success: false, message: 'Internal server error' },
       { status: 500 }
     );
   }

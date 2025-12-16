@@ -64,3 +64,35 @@ BEGIN
   ORDER BY c.ordinal_position;
 END;
 $$;
+
+-- 4. Execute dynamic SELECT query 
+CREATE OR REPLACE FUNCTION public.execute_dynamic_query(query_text text)
+RETURNS SETOF json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  query_text := trim(query_text);
+
+  -- Only allow SELECT
+  IF lower(left(query_text, 6)) <> 'select' THEN
+    RAISE EXCEPTION 'Only SELECT queries are allowed';
+  END IF;
+
+  -- Prevent stacked statements
+  IF query_text LIKE '%;%' THEN
+    RAISE EXCEPTION 'Multiple statements not allowed';
+  END IF;
+
+  -- Block dangerous keywords
+  IF query_text ~* '\b(update|delete|insert|drop|alter|grant|revoke|truncate)\b' THEN
+    RAISE EXCEPTION 'Forbidden keyword in query';
+  END IF;
+
+  -- Execute safe select and return JSON rows
+  RETURN QUERY EXECUTE format(
+    'SELECT row_to_json(t) FROM (%s) AS t',
+    query_text
+  );
+END;
+$$;

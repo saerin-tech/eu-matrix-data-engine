@@ -1,60 +1,37 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '../../../lib/supabase';
-import { ApiResponse, UpdateUserData } from '../../../types/user';
-
-interface UpdateUserRequest extends UpdateUserData {
-  userId: string;
-}
+import { ApiResponse } from '../../../types/user';
 
 export async function POST(request: Request) {
   try {
-    const body: UpdateUserRequest = await request.json();
-    const { userId, first_name, last_name, contact, roles_and_rights } = body;
+    const { userId, ...updateData } = await request.json();
 
-    // Validation
-    if (!userId || !first_name || !last_name || !roles_and_rights) {
+    if (!userId) {
       return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          message: 'Missing required fields'
-        },
+        { success: false, message: 'User ID is required' },
         { status: 400 }
       );
     }
 
-    // Validate role
-    if (roles_and_rights !== 'Admin' && roles_and_rights !== 'User') {
+      if (Object.keys(updateData).length === 0) {
       return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          message: 'Invalid role'
-        },
+        { success: false, message: 'No fields to update' },
         { status: 400 }
       );
     }
 
     const supabase = createServerClient();
 
-    // Update user
     const { data, error } = await supabase
       .from('users')
-      .update({
-        first_name,
-        last_name,
-        contact,
-        roles_and_rights
-      })
+      .update(updateData)
       .eq('id', userId)
       .select()
       .single();
 
     if (error) {
-      console.error('Update error:', error);
       return NextResponse.json<ApiResponse>(
-        {
-          success: false,
-          message: 'Failed to update user'
-        },
+        { success: false, message: 'Failed to update user' },
         { status: 500 }
       );
     }
@@ -66,14 +43,8 @@ export async function POST(request: Request) {
     });
 
   } catch (err) {
-    console.error('API Error:', err);
-    const errorMessage = err instanceof Error ? err.message : 'Internal server error';
-    
     return NextResponse.json<ApiResponse>(
-      {
-        success: false,
-        message: errorMessage
-      },
+      { success: false, message: 'Internal server error' },
       { status: 500 }
     );
   }

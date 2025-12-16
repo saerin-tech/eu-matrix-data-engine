@@ -43,4 +43,5 @@ export interface ApiResponse {
   success: boolean;
   message: string;
   user?: User;
+  data?: any
 }

@@ -9,6 +9,18 @@ const supabase = createClient(
 
 export type UserRole = 'Admin' | 'User';
 
+// Generate secure random password
+function generateSecurePassword(): string {
+  const length = 12;
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return password;
+}
+
+// Seed initial admin user
 export async function seedUser(): Promise<AuthResponse> {
   try {
     // Check if admin exists
@@ -82,21 +94,12 @@ export async function seedUser(): Promise<AuthResponse> {
   }
 }
 
-function generateSecurePassword(): string {
-  const length = 12;
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
-  }
-  return password;
-}
-
+// Validate user login credentials
 export async function validateLogin(user_name: string, user_password: string): Promise<AuthResponse> {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, user_name, user_password, roles_and_rights, is_enabled')
+      .select('id, user_name, user_password, roles_and_rights, is_enabled, first_name, last_name')
       .eq('user_name', user_name)
       .single();
 
@@ -115,7 +118,7 @@ export async function validateLogin(user_name: string, user_password: string): P
         message: 'Invalid username or password'
       };
     }
-     if (user.is_enabled === false) {
+     if (!user.is_enabled) {
       return {
         success: false,
         message: 'Your account has been disabled. Please contact your administrator.'
