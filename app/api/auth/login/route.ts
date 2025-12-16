@@ -15,6 +15,17 @@ export async function POST(request: NextRequest) {
     const result = await validateLogin(user_name, user_password);
     
     if (result.success) {
+      // Check if user is disabled
+      if (result.user && result.user.is_enabled === false) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            message: 'Your account has been disabled. Please contact your administrator.' 
+          },
+          { status: 403 }
+        );
+      }
+      
       return NextResponse.json(result);
     } else {
       return NextResponse.json(result, { status: 401 });

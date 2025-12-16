@@ -1,25 +1,21 @@
-import Button from './shared/Button';
-import Select from './shared/Select';
+import Button from '../shared/Button';
+import Select from '../shared/Select';
+import { PaginationMeta } from '../../types/user';
 
-interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
+interface BackendPaginationProps {
+  meta: PaginationMeta;
   onPageChange: (page: number) => void;
-  itemsPerPage: number;
   onItemsPerPageChange: (items: number) => void;
-  totalItems: number;
 }
 
-
-export default function Pagination({
-  currentPage,
-  totalPages,
+export default function BackendPagination({
+  meta,
   onPageChange,
-  itemsPerPage,
-  onItemsPerPageChange,
-  totalItems,
-}: PaginationProps) {
-
+  onItemsPerPageChange
+}: BackendPaginationProps) {
+  const { currentPage, totalPages, itemsPerPage, totalItems } = meta;
+  
+  // Calculate visible page numbers
   const pageNumbers: number[] = [];
   const maxVisiblePages = 5;
   
@@ -34,6 +30,7 @@ export default function Pagination({
     pageNumbers.push(i);
   }
 
+  // Calculate current range
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -46,9 +43,9 @@ export default function Pagination({
   ];
 
   return (
-    <div className="flex flex-col gap-4 p-5 bg-white border-t border-gray-300 rounded-b-lg">
+    <div className="flex flex-col gap-4 p-4 bg-white border-t border-gray-300">
       {/* Top Section: Items per page selector and info */}
-      <div className="flex justify-between items-center flex-wrap gap-3">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         {/* Items Per Page Selector */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">
@@ -67,29 +64,29 @@ export default function Pagination({
         </div>
       </div>
 
-      {/* Bottom Section: Page Navigation Buttons */}
+      {/* Bottom Section: Page Navigation */}
       <div className="flex justify-center items-center gap-2 flex-wrap">
-        {/* First Page */}
+        {/* First Page Button */}
         <Button 
           onClick={() => onPageChange(1)} 
           disabled={currentPage === 1}
           variant="secondary"
           size="sm"
         >
-          ««
+          First
         </Button>
 
-        {/* Previous Page */}
+        {/* Previous Page Button */}
         <Button 
           onClick={() => onPageChange(currentPage - 1)} 
           disabled={currentPage === 1}
           variant="secondary"
           size="sm"
         >
-          « Previous
+          Previous
         </Button>
 
-        {/* Ellipsis before page numbers */}
+        {/* Ellipsis before page numbers if needed */}
         {startPage > 1 && (
           <span className="text-gray-400 px-2">...</span>
         )}
@@ -106,28 +103,29 @@ export default function Pagination({
           </Button>
         ))}
 
+        {/* Ellipsis after page numbers if needed */}
         {endPage < totalPages && (
           <span className="text-gray-400 px-2">...</span>
         )}
 
-        {/* Next Page */}
+        {/* Next Page Button */}
         <Button 
           onClick={() => onPageChange(currentPage + 1)} 
           disabled={currentPage === totalPages}
           variant="secondary"
           size="sm"
         >
-          Next »
+          Next
         </Button>
 
-        {/* Last Page */}
+        {/* Last Page Button */}
         <Button 
           onClick={() => onPageChange(totalPages)} 
           disabled={currentPage === totalPages}
           variant="secondary"
           size="sm"
         >
-          »»
+          Last
         </Button>
       </div>
     </div>

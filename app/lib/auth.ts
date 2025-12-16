@@ -14,7 +14,7 @@ export async function seedUser(): Promise<AuthResponse> {
     // Check if admin exists
     const { data: existingUsers, error: checkError } = await supabase
       .from('users')
-      .select('id, user_name, roles_and_rights')
+      .select('id, user_name, roles_and_rights, is_enabled')
       .eq('roles_and_rights', 'Admin')
       .limit(1);
 
@@ -31,7 +31,8 @@ export async function seedUser(): Promise<AuthResponse> {
         user: {
           id: existingUsers[0].id,
           user_name: existingUsers[0].user_name,
-          roles_and_rights: existingUsers[0].roles_and_rights
+          roles_and_rights: existingUsers[0].roles_and_rights,
+          is_enabled: existingUsers[0].is_enabled
         }
       };
     }
@@ -48,6 +49,7 @@ export async function seedUser(): Promise<AuthResponse> {
           user_name: defaultUserName,
           user_password: hashedPassword,
           roles_and_rights: 'Admin',
+          is_enabled: true
         }
       ])
       .select()
@@ -63,7 +65,8 @@ export async function seedUser(): Promise<AuthResponse> {
       user: {
         id: newUser.id,
         user_name: newUser.user_name,
-        roles_and_rights: newUser.roles_and_rights
+        roles_and_rights: newUser.roles_and_rights,
+        is_enabled: newUser.is_enabled
       },
       credentials: {
         user_name: newUser.user_name,
@@ -93,7 +96,7 @@ export async function validateLogin(user_name: string, user_password: string): P
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, user_name, user_password, roles_and_rights')
+      .select('id, user_name, user_password, roles_and_rights, is_enabled')
       .eq('user_name', user_name)
       .single();
 
@@ -112,6 +115,12 @@ export async function validateLogin(user_name: string, user_password: string): P
         message: 'Invalid username or password'
       };
     }
+     if (user.is_enabled === false) {
+      return {
+        success: false,
+        message: 'Your account has been disabled. Please contact your administrator.'
+      };
+    }
 
     return {
       success: true,
@@ -119,7 +128,8 @@ export async function validateLogin(user_name: string, user_password: string): P
       user: {
         id: user.id,
         user_name: user.user_name,
-        roles_and_rights: user.roles_and_rights
+        roles_and_rights: user.roles_and_rights,
+        is_enabled: user.is_enabled
       }
     };
   } catch (error: any) {
@@ -167,6 +177,7 @@ export async function createUser(
           user_password: hashedPassword,
           roles_and_rights,
           created_by,             
+          is_enabled: true            
         }
       ])
       .select()
@@ -183,7 +194,8 @@ export async function createUser(
       user: {
         id: newUser.id,
         user_name: newUser.user_name,
-        roles_and_rights: newUser.roles_and_rights
+        roles_and_rights: newUser.roles_and_rights,
+        is_enabled: newUser.is_enabled
       }
     };
   } catch (error: any) {

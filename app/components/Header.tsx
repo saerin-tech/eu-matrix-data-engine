@@ -1,5 +1,7 @@
-import { LogOut, Sparkles, Menu, UserPlus } from "lucide-react";
+import { LogOut, Sparkles, Menu, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
+import Button from "./shared/Button";
+
 type UserRole = 'Admin' | 'User';
 
 interface HeaderProps {
@@ -7,6 +9,7 @@ interface HeaderProps {
   userRole: UserRole;
   onLogout: () => void;
   onCreateUser: () => void;
+  onManageUsers: () => void;
   organizationName?: string;
   organizationSubHeading?: string;
 }
@@ -16,11 +19,13 @@ export default function Header({
   userRole,
   onLogout, 
   onCreateUser,
+  onManageUsers,
   organizationName, 
   organizationSubHeading 
 }: HeaderProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const isAdmin = userRole === 'Admin';
+  const userInitial = userEmail.charAt(0).toUpperCase();
 
   return (
     <header className="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl mb-4 sm:mb-6 relative overflow-hidden">
@@ -48,7 +53,7 @@ export default function Header({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-slate-800/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-slate-700/50 shadow-lg">
               <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
-                {userEmail.charAt(0).toUpperCase()}
+                {userInitial}
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-gray-400">
@@ -62,23 +67,33 @@ export default function Header({
 
             {/* Create User Button (Admin Only) */}
             {isAdmin && (
-              <button
-                onClick={onCreateUser}
-                className="px-4 py-2 bg-gradient-to-r cursor-pointer from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-green-600/30 hover:shadow-green-600/50 active:scale-95 border border-green-500/20"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span className="hidden lg:inline">Create User</span>
-              </button>
+              <>
+                <Button
+                  onClick={onManageUsers}
+                  variant="info"
+                  icon={<Users className="w-4 h-4" />}
+                >
+                  <span className="hidden lg:inline">Manage Users</span>
+                </Button>
+
+                <Button
+                  onClick={onCreateUser}
+                  variant="success"
+                  icon={<UserPlus className="w-4 h-4" />}
+                >
+                  <span className="hidden lg:inline">Create User</span>
+                </Button>
+              </>
             )}
 
             {/* Logout Button */}
-            <button
+            <Button
               onClick={onLogout}
-              className="px-4 cursor-pointer sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-red-600/30 hover:shadow-red-600/50 active:scale-95 border border-red-500/20"
+              variant="danger"
+              icon={<LogOut className="w-4 h-4" />}
             >
-              <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Sign out</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -110,7 +125,7 @@ export default function Header({
               {/* User Info */}
               <div className="flex items-center gap-2 bg-slate-800/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-700/50">
                 <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {userEmail.charAt(0).toUpperCase()}
+                  {userInitial}
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="text-xs text-gray-400">
@@ -124,23 +139,36 @@ export default function Header({
 
               {/* Create User Button (Admin Only) */}
               {isAdmin && (
-                <button
-                  onClick={onCreateUser}
-                  className="w-full px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 flex items-center justify-center gap-2 text-sm font-semibold shadow-lg"
-                >
-                  <UserPlus className="w-4 h-4" />
+                <>
+                  <Button
+                    onClick={onManageUsers}
+                    variant="info"
+                    fullWidth
+                    icon={<Users className="w-4 h-4" />}
+                  >
+                    Manage Users
+                  </Button>
+
+                  <Button
+                    onClick={onCreateUser}
+                    variant="success"
+                    fullWidth
+                    icon={<UserPlus className="w-4 h-4" />}
+                  >
                   Create User
-                </button>
+                </Button>
+                </>
               )}
 
               {/* Logout Button */}
-            <button
-            onClick={onLogout}
-            className="w-full px-4 cursor-pointer py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center justify-center gap-2 text-sm font-semibold shadow-lg"
-            >
-            <LogOut className="w-4 h-4" />
+              <Button
+                onClick={onLogout}
+                variant="danger"
+                fullWidth
+                icon={<LogOut className="w-4 h-4" />}
+              >
             Sign out
-            </button>
+            </Button>
         </div>
         )}
         </div>

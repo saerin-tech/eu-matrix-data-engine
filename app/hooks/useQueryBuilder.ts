@@ -63,7 +63,7 @@ export function useQueryBuilder(
       const newFields: Field[] = result.columns.map((col: any) => ({
         name: `${tableName}.${col.name}`,
         label: `${tableName}.${col.name}`,
-        inputType: mapPostgresType(col.type),
+        inputType: 'text',
       }));
       
       setFields(newFields);

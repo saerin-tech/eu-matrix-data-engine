@@ -48,7 +48,6 @@ $$;
 CREATE OR REPLACE FUNCTION public.get_table_columns(tbl_name text)
 RETURNS TABLE (
   column_name text,
-  data_type text,
   is_nullable boolean
 )
 LANGUAGE plpgsql
@@ -58,7 +57,6 @@ BEGIN
   RETURN QUERY
   SELECT 
     c.column_name::text,
-    c.data_type::text,
     (c.is_nullable = 'YES') AS is_nullable
   FROM information_schema.columns c
   WHERE c.table_schema = 'public'

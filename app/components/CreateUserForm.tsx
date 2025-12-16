@@ -1,8 +1,8 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
-import TextInput from "./TextInput";
-import SelectInput from "./SelectInput";
-import SubmitButton from "./SubmitButton";
+import Input from './shared/Input';
+import Select from './shared/Select';
+import Button from './shared/Button';
 
 type UserRole = 'Admin' | 'User' | "";
 
@@ -139,7 +139,7 @@ export default function CreateUserForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <TextInput
+      <Input
         label="First Name"
         required
           value={formData.first_name}
@@ -147,7 +147,7 @@ export default function CreateUserForm({
           placeholder="Enter first name"
         />
 
-      <TextInput
+      <Input
         label="Last Name"
         required
           value={formData.last_name}
@@ -155,7 +155,7 @@ export default function CreateUserForm({
           placeholder="Enter last name"
         />
 
-      <TextInput
+      <Input
         label="User Name"
           required
           minLength={3}
@@ -164,7 +164,7 @@ export default function CreateUserForm({
           placeholder="Enter username (min 3 characters)"
         />
 
-      <TextInput
+      <Input
         label="Contact"
           type="text"
         showCount
@@ -174,7 +174,7 @@ export default function CreateUserForm({
           placeholder="Enter contact number (optional)"
         />
 
-      <SelectInput
+      <Select
         label="Role"
         required
           value={formData.roles_and_rights}
@@ -185,7 +185,7 @@ export default function CreateUserForm({
         ]}
       />
 
-      <TextInput
+      <Input
         label="Password"
           required
             value={formData.user_password}
@@ -193,11 +193,9 @@ export default function CreateUserForm({
             minLength={6}
         onChange={(e) => updateField('user_password', e.target.value)}
         showPasswordToggle
-        isPasswordVisible={showPassword}
-        onTogglePassword={() => setShowPassword(!showPassword)}
       />
 
-      <TextInput
+      <Input
         label="Confirm Password"
         required
             value={formData.confirm_password}
@@ -205,8 +203,6 @@ export default function CreateUserForm({
             minLength={6}
         onChange={(e) => updateField('confirm_password', e.target.value)}
         showPasswordToggle
-        isPasswordVisible={showConfirmPassword}
-        onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
       />
 
       {success && (
@@ -223,12 +219,13 @@ export default function CreateUserForm({
         </div>
       )}
 
-      <SubmitButton
+      <Button
         loading={loading}
         disabled={!isFormValid}
-        text="Create User"
-        icon={<UserPlus className="w-5 h-5" />}
-      />
+        icon={<UserPlus className="w-5 h-5" />}>
+          Create User
+        </Button>
+      
     </form>
   );
 }
