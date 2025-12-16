@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { autoDeployRPCFunctions } from './deploy-rpc'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -21,4 +22,23 @@ export const createServerClient = () => {
   })
 }
 
+let isRPCDeployed = false
 
+if (!isRPCDeployed) {
+  autoDeployRPCFunctions()
+    .then(result => {
+      if (result.success) {
+        isRPCDeployed = true
+        if (result.alreadyDeployed) {
+          console.log(' RPC functions already deployed')
+        } else {
+          console.log(' RPC functions deployed successfully')
+        }
+      } else {
+        console.error(' RPC deployment failed:', result.message)
+      }
+    })
+    .catch(error => {
+      console.error(' RPC deployment error:', error)
+    })
+}

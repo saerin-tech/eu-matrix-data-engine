@@ -1,11 +1,9 @@
 
 import { NextResponse } from 'next/server'
 import { createServerClient } from '../../lib/supabase'
-import { autoDeployRPCFunctions } from '../../lib/deploy-rpc';
 
 export async function GET() {
   try {
-    await autoDeployRPCFunctions()
     const supabase = createServerClient()
     
     // Supabase RPC function call
