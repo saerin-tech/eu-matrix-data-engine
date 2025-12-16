@@ -1,6 +1,7 @@
-'use client';
 import { useState, FormEvent } from 'react';
-import { LogIn, Loader, AlertCircle, Eye, EyeOff  } from 'lucide-react';
+import { LogIn, AlertCircle, Lock } from 'lucide-react';
+import Button from './shared/Button';
+import Input from './shared/Input';
 
 interface LoginCredentials {
   user_name: string;
@@ -18,12 +19,13 @@ export default function LoginForm({ onLoginSuccess }: Props) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-   const [showPassword, setShowPassword] = useState(false);
+  const [isAccountDisabled, setIsAccountDisabled] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setIsAccountDisabled(false);
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -41,6 +43,10 @@ export default function LoginForm({ onLoginSuccess }: Props) {
           result.user.roles_and_rights
         );
       } else {
+        // Check if account is disabled (403 status)
+        if (response.status === 403) {
+          setIsAccountDisabled(true);
+        }
         setError(result.message || 'Login failed');
       }
     } catch (err) {
@@ -52,71 +58,60 @@ export default function LoginForm({ onLoginSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          Username
-        </label>
-        <input
+      <Input
+        label="Username"
           type="text"
           value={credentials.user_name}
           onChange={(e) => setCredentials({ ...credentials, user_name: e.target.value })}
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
           placeholder="Enter username"
-        />
-      </div>
+        autoComplete="username"
+         disabled={loading}
+      />
 
-      <div>
-        <label className="block mb-2 text-sm font-semibold text-gray-700">
-          Password
-        </label>
-        <div className='relative'>
-        <input
-          type={showPassword ? "text" : "password"}
+      <Input
+        label="Password"
+        type="password"
           value={credentials.user_password}
           onChange={(e) => setCredentials({ ...credentials, user_password: e.target.value })}
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
-          placeholder="Enter password"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-        >
-          {showPassword ? (
-            <EyeOff className="w-5 h-5" />
-          ) : (
-            <Eye className="w-5 h-5" />
-          )}
-        </button>
-        </div>
-      </div>
+        placeholder="Enter password"
+        showPasswordToggle
+        autoComplete="current-password"
+         disabled={loading}
+      />
 
+      {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
-          {error}
+        <div className={`p-3 border rounded-lg text-sm flex items-start gap-3 ${
+            isAccountDisabled 
+              ? 'bg-orange-50 border-orange-200 text-orange-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            {isAccountDisabled ? (
+              <Lock className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            )}
+          <div>
+            <p className="font-semibold">
+              {isAccountDisabled ? 'Account Disabled' : 'Login Failed'}
+            </p>
+            <p className="text-xs mt-1">{error}</p>
+          </div>
         </div>
       )}
 
-      <button
+      {/* Submit Button */}
+      <Button
         type="submit"
-        disabled={loading}
-        className="w-full px-6 py-3 cursor-pointer bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+        variant="primary"
+        loading={loading}
+        fullWidth
+        icon={!loading ? <LogIn className="w-5 h-5" /> : undefined}
       >
-        {loading ? (
-          <>
-            <Loader className="w-5 h-5 animate-spin" />
-            Signing in...
-          </>
-        ) : (
-          <>
-            <LogIn className="w-5 h-5" />
-            Sign In
-          </>
-        )}
-      </button>
+        {loading ? 'Signing in...' : 'Sign In'}
+      </Button>
     </form>
   );
 }

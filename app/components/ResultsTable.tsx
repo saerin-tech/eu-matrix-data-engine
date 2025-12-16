@@ -1,8 +1,10 @@
-import Pagination from './Pagination';
 import { Info, Download } from 'lucide-react';
+import { useState } from 'react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { useState } from 'react';
+import Button from './shared/Button';
+import { Table, TableHeader, TableCell, TableRow } from './shared/Table';
+import Pagination from './Pagination';
 
 interface Props {
   data: any[];
@@ -145,48 +147,40 @@ export default function ResultsTable({
           Results ({data.length} total records)
         </h2>
         
-        {/* Export Button */}
-        <button
+        <Button
           onClick={exportToExcel}
           disabled={isExporting}
-          className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors shadow-sm disabled:cursor-not-allowed"
+          variant="success"
+          icon={<Download className="w-4 h-4" />}
+          loading={isExporting}
         >
-          <Download className="w-4 h-4" />
           {isExporting ? 'Exporting...' : 'Export to Excel'}
-        </button>
+        </Button>
       </div>
 
-      <div className="overflow-x-auto max-w-full ">
+      {/* Results Table */}
+      <div className="overflow-x-auto max-w-full">
         <table className="w-full border-collapse min-w-[600px] border-2">
           <thead>
-            <tr className="bg-gray-50">
+            <TableRow hoverable={false}>
               {columns?.map((column, index) => (
-                <th 
-                  key={index} 
-                  className="px-8 py-3 text-left border-b-2 border-gray-300 text-gray-700 font-semibold text-sm whitespace-nowrap sticky top-0 bg-gray-50 z-10"
-                >
+                <TableHeader key={index}>
                   {column}
-                </th>
+                </TableHeader>
               ))}
-            </tr>
+            </TableRow>
           </thead>
           <tbody>
             {currentData?.map((row, rowIndex) => (
-              <tr 
-                key={rowIndex}
-                className={`transition-colors ${rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-200`}
-              >
+              <TableRow key={rowIndex}>
                 {columns?.map((column, colIndex) => (
-                  <td 
-                    key={colIndex}
-                    className="px-8 py-3 border-b border-gray-300 text-gray-800 text-sm max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap"
-                  >
+                  <TableCell key={colIndex}>
                     {typeof row[column] === 'object' 
                       ? JSON.stringify(row[column]) 
                       : String(row[column] ?? '')}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))}
           </tbody>
         </table>

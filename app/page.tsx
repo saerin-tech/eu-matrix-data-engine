@@ -7,6 +7,7 @@ import TableSelector from './components/TableSelector';
 import QueryBuilderSection from './components/QueryBuilderSection';
 import JoinModal from './components/JoinModal';
 import CreateUserModal from './components/CreateUserModal';
+import UserManagement from './components/user-management/UserManagement'; // NEW
 import ErrorAlert from './components/ErrorAlert';
 import ResultsTable from './components/ResultsTable';
 import { JoinConfig, ConnectionStatus as Status } from './types';
@@ -24,6 +25,7 @@ export default function Page() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<UserRole>('User');
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false); 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -143,24 +145,14 @@ export default function Page() {
     const result = await response.json();
     if (!response.ok || !result.columns) return [];
     
-    const columnNames = result.columns.map((col: any) => col.name);
+    const columnNames = result.columns.map((col: { name: string }) => col.name);
     setAvailableColumns(prev => ({ ...prev, [tableName]: columnNames }));
     
-    return result.columns.map((col: any) => ({
+    return result.columns.map((col: { name: string; type?: string }) => ({
       name: `${tableName}.${col.name}`,
       label: `${tableName}.${col.name}`,
-      inputType: mapPostgresType(col.type),
+      inputType: 'text',
     }));
-  }
-
-  function mapPostgresType(pgType: string): string {
-    const map: { [key: string]: string } = {
-      'integer': 'number', 'bigint': 'number', 'int8': 'number', 'int4': 'number',
-      'numeric': 'number', 'real': 'number', 'double precision': 'number',
-      'boolean': 'checkbox', 'date': 'date', 'timestamp': 'datetime-local',
-      'timestamptz': 'datetime-local', 'time': 'time',
-    };
-    return map[pgType.toLowerCase()] || 'text';
   }
 
   async function handleOpenJoinModal() {
@@ -224,6 +216,25 @@ export default function Page() {
     return null;
   }
 
+  // Show User Management component if active
+  if (showUserManagement) {
+    return (
+      <div className="min-h-screen flex flex-col p-3 sm:p-5 max-w-[1400px] mx-auto">
+        <Header 
+          userEmail={userEmail}
+          userRole={userRole}
+          onLogout={handleLogout}
+          onCreateUser={() => setShowCreateUserModal(true)}
+          onManageUsers={() => setShowUserManagement(false)} 
+          organizationName={process.env.NEXT_PUBLIC_ORGANIZATION}
+          organizationSubHeading={process.env.NEXT_PUBLIC_ORGANIZATION_SUB_HEADING}
+        />
+        <UserManagement />
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col p-3 sm:p-5 max-w-[1400px] mx-auto">
       
@@ -232,6 +243,7 @@ export default function Page() {
         userRole={userRole}
         onLogout={handleLogout}
         onCreateUser={() => setShowCreateUserModal(true)}
+        onManageUsers={() => setShowUserManagement(true)}
         organizationName={process.env.NEXT_PUBLIC_ORGANIZATION}
         organizationSubHeading={process.env.NEXT_PUBLIC_ORGANIZATION_SUB_HEADING}
       />

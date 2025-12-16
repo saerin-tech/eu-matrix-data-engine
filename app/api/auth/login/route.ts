@@ -15,9 +15,10 @@ export async function POST(request: NextRequest) {
     const result = await validateLogin(user_name, user_password);
     
     if (result.success) {
-      return NextResponse.json(result);
+       return NextResponse.json(result, { status: 200 });
     } else {
-      return NextResponse.json(result, { status: 401 });
+      const statusCode = result.message.includes('disabled') ? 403 : 401;
+      return NextResponse.json(result, { status: statusCode });
     }
   } catch (error: any) {
     return NextResponse.json(
