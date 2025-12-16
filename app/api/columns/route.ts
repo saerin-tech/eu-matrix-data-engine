@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     // Column details return
     const columns = data?.map((col: any) => ({
       name: col.column_name,
-      nullable: col.is_nullable
+      nullable: col.is_nullable === "Yes"
     })) || []
     
     return NextResponse.json({ 
