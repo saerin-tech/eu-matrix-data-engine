@@ -125,10 +125,6 @@ export async function validateLogin(user_name: string, user_password: string): P
         message: 'Your account has been disabled. Please contact your administrator.'
       };
     }
-    if(user.user_name && isPasswordValid && user.is_enabled){
-      await autoDeployRPCFunctions()
-        console.log("rpc function deployed seccfully, ");
-    }       
     return {
       success: true,
       message: 'Login successful',
