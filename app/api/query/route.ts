@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { createServerClient } from '../../lib/supabase'
+import { NextResponse } from 'next/server';
+import { createDatabaseClient } from '../../lib/database-client';
 
 interface Rule {
   field: string;
@@ -19,26 +19,37 @@ interface JoinConfig {
   targetColumn: string;
 }
 
+interface SelectedColumn {
+  table: string;
+  column: string;
+  alias: string;
+}
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { table, query, joins = [], selectedColumns = [] } = body;
+    const { table, query, joins = [], selectedColumns = [], databaseId } = await request.json();
 
     if (!table) {
-      console.error("Table is missing in request body:", body); //  Debug
       return NextResponse.json(
         { error: "Table name is required" },
         { status: 400 }
       );
     }
 
-    const supabase = createServerClient();
-    const sqlQuery = buildSQL(table, query, joins, selectedColumns);
-    const isDebugMode = process.env.NEXT_PUBLIC_DEBUG_MODE == 'true';
+    // Get database client
+    const supabase = await createDatabaseClient(databaseId);
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not found' },
+        { status: 404 }
+      );
+    }
 
-    try {
-      const { data, error } = await supabase.rpc("execute_dynamic_query", {
-        query_text: sqlQuery,
+    const sqlQuery = buildSQL(table, query, joins, selectedColumns);
+
+    // Execute query via RPC
+      const { data, error } = await supabase.rpc('execute_dynamic_query', {
+        p_query_text: sqlQuery,
       });
 
       if (error) {
@@ -52,6 +63,8 @@ export async function POST(request: Request) {
         );
       }
 
+    const isDebugMode = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true';
+
       return NextResponse.json({ 
         success: true, 
         table, 
@@ -61,26 +74,19 @@ export async function POST(request: Request) {
         sqlQuery : isDebugMode? sqlQuery : null
       });
     } catch (err: any) {
-      console.error("FATAL ERROR →", err);
-
+      console.error('Query execution error:', err);
       return NextResponse.json(
         {
           success: false,
           userMessage: "Internal query execution error.",
           devMessage: err.message,
         },
-        { status: 500 }
-      );
-    }
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: "Internal server error", message: err.message },
       { status: 500 }
     );
   }
 }
 
-function q(identifier: string): string {
+function quote(identifier: string): string {
   return `"${identifier.replace(/"/g, '""')}"`;
 }
 
@@ -89,46 +95,45 @@ function buildSQL(
   table: string,
   query: RuleGroup,
   joins: JoinConfig[],
-  selectedColumns: { table: string; column: string; alias: string }[]
+  selectedColumns: SelectedColumn[]
 ): string {
   const mainAlias = "main";
-  const main = q(table);
+  let sql = 'SELECT ';
 
-  let sql = "SELECT ";
-
-  //  If no columns selected, return all columns
+  // Build column selection
   if (selectedColumns.length === 0) {
     sql += `${mainAlias}.*`;
-    joins.forEach((j, index) => {
-      const alias = `j${index}`;
-      sql += `, ${alias}.*`;
+    joins.forEach((_, index) => {
+      sql += `, j${index}.*`;
     });
   } else {
     //  Use selected columns with aliases
     sql += selectedColumns
-      .map((c) => {
-        const tableAlias = c.table === table 
+      ?.map((col) => {
+        const tableAlias = col.table === table
           ? mainAlias 
-          : `j${joins.findIndex((j) => j.targetTable === c.table)}`;
-        
-        return `${tableAlias}.${q(c.column)} AS ${q(c.alias)}`;
+          : `j${joins.findIndex((j) => j.targetTable === col.table)}`;
+         return `${tableAlias}.${quote(col.column)} AS ${quote(col.alias)}`;
       })
-      .join(", ");
+      .join(', ');
   }
 
   // FROM clause
-  sql += ` FROM ${main} AS ${mainAlias}`;
+  sql += ` FROM ${quote(table)} AS ${mainAlias}`;
 
-  // Joins
-  joins.forEach((j, index) => {
+  // JOIN
+  joins.forEach((join, index) => {
     const joinAlias = `j${index}`;
-    sql += ` ${j.type} JOIN ${q(j.targetTable)} AS ${joinAlias} ON ${mainAlias}.${q(j.sourceColumn)} = ${joinAlias}.${q(j.targetColumn)}`;
+    sql += ` ${join.type} JOIN ${quote(join.targetTable)} AS ${joinAlias}`;
+    sql += ` ON ${mainAlias}.${quote(join.sourceColumn)} = ${joinAlias}.${quote(join.targetColumn)}`;
   });
 
   // WHERE clause
-  if (query && query.rules.length > 0) {
+  if (query?.rules?.length > 0) {
     const where = buildWhere(query, mainAlias, table, joins);
-    if (where.trim()) sql += ` WHERE ${where}`;
+    if (where.trim()) {
+      sql += ` WHERE ${where}`;
+    }
   }
 
   return sql;
@@ -146,7 +151,9 @@ function buildWhere(
   for (const rule of group.rules) {
     if ("rules" in rule) {
       const nested = buildWhere(rule, mainAlias, mainTable, joins);
-      if (nested.trim()) parts.push(`(${nested})`);
+      if (nested.trim()) {
+        parts.push(`(${nested})`);
+      }
     } else if (rule.field && rule.operator) {
       parts.push(buildCondition(rule, mainAlias, mainTable, joins));
     }
@@ -163,19 +170,14 @@ function buildCondition(
   joins: JoinConfig[]
 ): string {
   let field: string;
-
-  // Parse field (e.g., "users.name" or "name")
-  if (rule.field.includes(".")) {
-    const [tbl, col] = rule.field.split(".");
-    
-    // Determine alias
+  if (rule.field.includes('.')) {
+    const [tbl, col] = rule.field.split('.');
     const tableAlias = tbl === mainTable 
       ? mainAlias 
       : `j${joins.findIndex((j) => j.targetTable === tbl)}`;
-    
-    field = `${tableAlias}.${q(col)}`;
+    field = `${tableAlias}.${quote(col)}`;
   } else {
-    field = `${mainAlias}.${q(rule.field)}`;
+    field = `${mainAlias}.${quote(rule.field)}`;
   }
 
   //  Helper: Check if value is actually numeric
@@ -184,46 +186,30 @@ function buildCondition(
     return !isNaN(Number(val)) && !isNaN(parseFloat(String(val)));
   };
 
-  //  Determine if we should use text operations
-  const isTextOperator = ['contains', 'beginsWith', 'endsWith'].includes(rule.operator);
-  const valueIsNumeric = isNumeric(rule.value);
-  
+  const escapeValue = (val: any, normalize: boolean): string => {
+    if (val === null || val === undefined) return 'NULL';
+    if (isNumeric(val)) return String(Number(val));
 
-  const shouldNormalize = isTextOperator || (!valueIsNumeric && rule.operator !== 'null' && rule.operator !== 'notNull');
-  const normField = shouldNormalize ? `unaccent(lower(CAST(${field} AS TEXT)))` : field;
-
-
-  const escapeValue = (val: any): string => {
-    if (val === null || val === undefined) return "NULL";
-    
-
-    if (isNumeric(val)) {
-      return String(Number(val)); 
-    }
-    
-    if (typeof val === "string") {
-      const clean = val.replace(/'/g, "''");
-      return shouldNormalize ? `unaccent(lower('${clean}'))` : `'${clean}'`;
-    }
-    
-    return `'${String(val).replace(/'/g, "''")}'`;
+    const clean = String(val).replace(/'/g, "''");
+    return normalize ? `unaccent(lower('${clean}'))` : `'${clean}'`;
   };
 
-  switch (rule.operator) {
-    case "=":
-      return `${normField} = ${escapeValue(rule.value)}`;
-      
-    case "!=":
-      return `${normField} != ${escapeValue(rule.value)}`;
-      
-    case "<":
-    case ">":
-    case "<=":
-    case ">=":
+  // Determine normalization requirements
+  const isTextOperator = ['contains', 'beginsWith', 'endsWith'].includes(rule.operator);
+  const shouldNormalize = isTextOperator || (!isNumeric(rule.value) && !['null', 'notNull'].includes(rule.operator));
+  const normField = shouldNormalize ? `unaccent(lower(CAST(${field} AS TEXT)))` : field;
 
-      const compValue = isNumeric(rule.value) 
-        ? Number(rule.value) 
-        : `'${String(rule.value).replace(/'/g, "''")}'`;
+  // Build condition based on operator
+  switch (rule.operator) {
+    case '=':
+    case '!=':
+      return `${normField} ${rule.operator === '=' ? '=' : '!='} ${escapeValue(rule.value, shouldNormalize)}`;
+
+    case '<':
+    case '>':
+    case '<=':
+    case '>=':
+      const compValue = isNumeric(rule.value) ? Number(rule.value) : `'${String(rule.value).replace(/'/g, "''")}'`;
       return `${field} ${rule.operator} ${compValue}`;
       
     case "contains":
@@ -243,13 +229,13 @@ function buildCondition(
       
     case "in":
       const list = Array.isArray(rule.value)
-        ? rule.value.map((v) => escapeValue(v)).join(", ")
-        : escapeValue(rule.value);
+        ? rule.value?.map((v) => escapeValue(v, shouldNormalize)).join(', ')
+        : escapeValue(rule.value, shouldNormalize);
       return shouldNormalize 
         ? `${normField} IN (${list})`
         : `${field} IN (${list})`;
       
     default:
-      return `${normField} = ${escapeValue(rule.value)}`;
+      return `${normField} = ${escapeValue(rule.value, shouldNormalize)}`;
   }
 }

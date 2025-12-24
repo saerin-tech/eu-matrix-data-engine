@@ -12,6 +12,7 @@ interface Props {
   query: RuleGroupType;
   joins: JoinConfig[];
   selectedTable: string;
+  databaseId?: string;
   loading: boolean;
   queryExecuting: boolean;
   onQueryChange: (query: RuleGroupType) => void;
@@ -36,6 +37,7 @@ export default function QueryBuilderSection({
   query,
   joins,
   selectedTable,
+  databaseId,
   loading,
   queryExecuting,
   onQueryChange,
@@ -81,6 +83,7 @@ export default function QueryBuilderSection({
           <ColumnSelector
             table={selectedTable}
             joins={joins}
+            databaseId={databaseId} 
             onColumnsChange={onColumnsChange}
           />
 
@@ -106,6 +109,7 @@ export default function QueryBuilderSection({
             query={query} 
             onQueryChange={onQueryChange}
             operators={customOperators}
+            context={{ databaseId }} 
             controlElements={{
             fieldSelector: CustomFieldSelector,
               valueEditor: CustomValueEditor,}}

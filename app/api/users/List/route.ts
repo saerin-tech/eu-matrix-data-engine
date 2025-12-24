@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '../../../lib/supabase';
+import { getSupabaseClient } from '../../../lib/supabase';
 import { User, PaginationMeta, UsersResponse } from '../../../types/user';
 
 export async function GET(request: NextRequest) {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = createServerClient();
+    const supabase = await getSupabaseClient();
 
     // Count total users
     const { count, error: countError } = await supabase

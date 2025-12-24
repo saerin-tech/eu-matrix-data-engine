@@ -1,6 +1,17 @@
 import { RuleGroupType, Field } from 'react-querybuilder';
 import { JoinConfig, ConnectionStatus } from '../types';
 
+interface QueryBuilderHook {
+  checkConnection: () => Promise<void>;
+  loadTables: () => Promise<void>;
+  loadTableColumns: (tableName: string) => Promise<void>;
+  executeQuery: (
+    selectedTable: string,
+    selectedColumns: { table: string; column: string; alias: string }[],
+    query: RuleGroupType,
+    joins: JoinConfig[]
+  ) => Promise<any>;
+}
 
 export function useQueryBuilder(
   setConnectionStatus: (status: ConnectionStatus) => void,
@@ -8,14 +19,20 @@ export function useQueryBuilder(
   setFields: (fields: Field[]) => void,
   setData: (data: any[]) => void,
   setError: (error: string | null) => void,
-  setAvailableColumns: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>
-) {
+  setAvailableColumns: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>,
+  selectedDatabaseId?: string
+): QueryBuilderHook {
   async function checkConnection() {
     try {
-      const response = await fetch('/api/tables');
+      const response = await fetch('/api/tables', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ databaseId: selectedDatabaseId }),
+      });
+
       if (response.ok) {
         setConnectionStatus('connected');
-        console.log('Backend API connection successful!');
+        console.log('Database connection successful');
       } else {
         throw new Error('Backend not responding');
       }
@@ -28,7 +45,12 @@ export function useQueryBuilder(
   async function loadTables() {
     setError(null);
     try {
-      const response = await fetch('/api/tables');
+      const response = await fetch('/api/tables', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ databaseId: selectedDatabaseId }),
+      });
+
       const result = await response.json();
       
       if (!response.ok) {
@@ -48,7 +70,7 @@ export function useQueryBuilder(
       const response = await fetch('/api/columns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tableName })
+        body: JSON.stringify({ tableName , databaseId: selectedDatabaseId}),
       });
       
       const result = await response.json();
@@ -57,10 +79,10 @@ export function useQueryBuilder(
         throw new Error(result.error || 'Failed to load columns');
       }
       
-      const columnNames = result.columns.map((col: any) => col.name);
+      const columnNames = result.columns?.map((col: any) => col.name);
       setAvailableColumns(prev => ({ ...prev, [tableName]: columnNames }));
       
-      const newFields: Field[] = result.columns.map((col: any) => ({
+      const newFields: Field[] = result.columns?.map((col: any) => ({
         name: `${tableName}.${col.name}`,
         label: `${tableName}.${col.name}`,
         inputType: 'text',
@@ -74,7 +96,7 @@ export function useQueryBuilder(
   }
 
   function processQueryRules(ruleGroup: RuleGroupType): any {
-    const processedRules = ruleGroup.rules.map((rule: any) => {
+    const processedRules = ruleGroup.rules?.map((rule: any) => {
       if ('rules' in rule && Array.isArray(rule.rules)) {
         return {
           combinator: rule.combinator || 'and',
@@ -118,7 +140,8 @@ export function useQueryBuilder(
           table: selectedTable, 
           query: processedQuery,
           joins: joins,
-          selectedColumns: selectedColumns 
+          selectedColumns: selectedColumns,
+          databaseId: selectedDatabaseId,
         })
       });
 
@@ -141,16 +164,6 @@ export function useQueryBuilder(
       console.error('Query execution error:', err);
       return null;
     }
-  }
-
-  function mapPostgresType(pgType: string): string {
-    const map: { [key: string]: string } = {
-      'integer': 'number', 'bigint': 'number', 'int8': 'number', 'int4': 'number',
-      'numeric': 'number', 'real': 'number', 'double precision': 'number',
-      'boolean': 'checkbox', 'date': 'date', 'timestamp': 'datetime-local',
-      'timestamptz': 'datetime-local', 'time': 'time',
-    };
-    return map[pgType.toLowerCase()] || 'text';
   }
 
   return {

@@ -1,4 +1,4 @@
-import { LogOut, Sparkles, Menu, UserPlus, Users } from "lucide-react";
+import { LogOut, Sparkles, Menu, UserPlus, Users, DatabaseIcon } from "lucide-react";
 import { useState } from "react";
 import Button from "./shared/Button";
 
@@ -10,6 +10,7 @@ interface HeaderProps {
   onLogout: () => void;
   onCreateUser: () => void;
   onManageUsers: () => void;
+  onAddDatabase: () => void;
   organizationName?: string;
   organizationSubHeading?: string;
 }
@@ -20,6 +21,7 @@ export default function Header({
   onLogout, 
   onCreateUser,
   onManageUsers,
+  onAddDatabase,
   organizationName, 
   organizationSubHeading 
 }: HeaderProps) {
@@ -68,6 +70,14 @@ export default function Header({
             {/* Create User Button (Admin Only) */}
             {isAdmin && (
               <>
+                <Button
+                  onClick={onAddDatabase}
+                  variant="warning"
+                  icon={<DatabaseIcon className="w-4 h-4" />}
+                >
+                  <span className="hidden xl:inline">Add Database</span>
+                </Button>
+
                 <Button
                   onClick={onManageUsers}
                   variant="info"
@@ -140,6 +150,15 @@ export default function Header({
               {/* Create User Button (Admin Only) */}
               {isAdmin && (
                 <>
+                  <Button
+                    onClick={onAddDatabase}
+                    variant="warning"
+                    fullWidth
+                    icon={<DatabaseIcon className="w-4 h-4" />}
+                  >
+                    Add Database
+                  </Button>
+
                   <Button
                     onClick={onManageUsers}
                     variant="info"

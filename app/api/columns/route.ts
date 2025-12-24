@@ -1,11 +1,9 @@
-import { NextResponse } from 'next/server'
-import { createServerClient } from '../../lib/supabase'
+import { NextResponse } from 'next/server';
+import { createDatabaseClient } from '../../lib/database-client';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { tableName } = body
-    
+    const { tableName, databaseId } = await request.json();
     // Validation
     if (!tableName || typeof tableName !== 'string') {
       return NextResponse.json(
@@ -14,26 +12,32 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = createServerClient()
-    
-    // Supabase RPC call for columns
-    const { data, error } = await supabase.rpc('get_table_columns', { 
-      tbl_name: tableName 
+    const supabase = await createDatabaseClient(databaseId);
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not found' },
+        { status: 404 }
+      );
+    }
+
+    // Fetch columns using RPC function
+    const { data, error } = await supabase.rpc('get_table_columns', {
+      p_table_name: tableName,
     })
     
     if (error) {
-      console.error('Error fetching columns:', error)
+      console.error('RPC error fetching columns:', error)
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
       )
     }
 
-    // Column details return
-    const columns = data?.map((col: any) => ({
+    // Transform response
+    const columns = (data || [])?.map((col: any) => ({
       name: col.column_name,
-    })) || []
-    
+      isNullable: col.is_nullable,
+    }))
     return NextResponse.json({ 
       success: true, 
       table: tableName,

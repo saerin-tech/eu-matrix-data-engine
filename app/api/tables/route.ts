@@ -1,24 +1,30 @@
-
 import { NextResponse } from 'next/server'
-import { createServerClient } from '../../lib/supabase'
+import { createDatabaseClient } from '../../lib/database-client'
 
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    const supabase = createServerClient()
-    
-    // Supabase RPC function call
-    const { data, error } = await supabase.rpc('get_tables_list')
-    
-    if (error) {
-      console.error('Error fetching tables:', error)
+    const { databaseId } = await request.json()
+
+    // Get correct database client
+    const supabase = await createDatabaseClient(databaseId)
+    if (!supabase) {
       return NextResponse.json(
-        { error: error.message, details: 'RPC function not found. Please create it in Supabase SQL Editor.' },
+        { error: 'Database not found or connection failed' },
+        { status: 404 }
+      )
+    }
+
+    const { data, error } = await supabase.rpc('get_tables_list')
+
+    if (error) {
+      console.error('RPC error fetching tables:', error)
+      return NextResponse.json(
+        { error: error.message || 'Could not fetch tables' },
         { status: 500 }
       )
     }
 
-    // Table names extract
-    const tableNames = data?.map((t: any) => t.table_name || t) || []
+    const tableNames = (data || [])?.map((t: any) => t.table_name || t)
     
     return NextResponse.json({ 
       success: true, 

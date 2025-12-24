@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '../../../lib/supabase';
+import { getSupabaseClient } from '../../../lib/supabase';
 import { ApiResponse } from '../../../types/user';
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createServerClient();
+    const supabase = await getSupabaseClient();
     const numericUserId = typeof userId === 'string' ? parseInt(userId) : userId;
     
     if (isNaN(numericUserId)) {

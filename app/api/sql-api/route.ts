@@ -1,48 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '../../lib/supabase'
+import { NextResponse } from 'next/server';
+import { createDatabaseClient } from '../../lib/database-client';
 
-export async function POST(request: NextRequest) {
+interface SQLAPIRequest {
+  tableName: string;
+  columnName: string;
+  searchTerm?: string;
+  databaseId?: string;
+}
 
+export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { tableName, columnName, searchTerm = '' } = body
+    const body: SQLAPIRequest = await request.json();
+    const { tableName, columnName, searchTerm = '', databaseId } = body;
 
     //     Validation
     if (!tableName || !columnName) {
       return NextResponse.json(
-        { 
-          error: 'Missing required fields',
-          required: ['tableName', 'columnName']
-        },
+        { error: 'tableName and columnName are required' },
         { status: 400 }
-      )
+      );
     }
-    const supabase = createServerClient()
 
-    //     CORRECT: Pass params as JSONB object
+    // Get database client
+    const supabase = await createDatabaseClient(databaseId);
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not found' },
+        { status: 404 }
+      );
+    }
+
     const { data, error } = await supabase.rpc('get_filtered_search_values_text_num', {
-      params: {
-        table_name: tableName,
-        column_name: columnName,
-        search: searchTerm
-      }
+        p_table_name: tableName,
+        p_column_name: columnName,
+        p_search: searchTerm 
     })
 
     if (error) {
-      console.error('[SQL-API] RPC error:', error)
-
-      //     Function not found error
-      if (error.message.includes('function') && error.message.includes('does not exist')) {
-        return NextResponse.json(
-          { 
-            error: 'RPC function not found',
-            hint: 'Please deploy functions using POST /api/deploy-rpc',
-            details: error.message
-          },
-          { status: 404 }
-        )
-      }
-
+      console.error('[SQL-API] RPC error:', error);
       return NextResponse.json(
         { 
           error: error.message,
@@ -54,24 +49,18 @@ export async function POST(request: NextRequest) {
     }
 
     //     Extract values
-    const values = data?.map((row: any) => row.val) || []
+    const values = (data || [])?.map((row: any) => row.val);
 
     return NextResponse.json({
       success: true,
-      count: values.length,
       values,
-      tableName,
-      column: columnName,
-      searchTerm
+      count: values.length,
     })
 
   } catch (err: any) {
-    console.error('[SQL-API] Unexpected error:', err)
+    console.error('[SQL-API] Error:', err);
     return NextResponse.json(
-      { 
-        error: 'Internal server error',
-        message: err.message
-      },
+      { error: 'Internal server error', message: err.message },
       { status: 500 }
     )
   }

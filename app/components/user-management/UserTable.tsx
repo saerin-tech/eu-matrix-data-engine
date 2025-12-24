@@ -45,7 +45,6 @@ export default function UserTable({
       </div>
     );
   }
-console.log(users[0].is_enabled, "userrrrsss [0] ");
 
   // Show empty state when no users found
   if (users.length === 0) {

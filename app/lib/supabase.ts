@@ -1,44 +1,67 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { autoDeployRPCFunctions } from './deploy-rpc'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+type SupabaseMode = 'public' | 'service'
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+interface SupabaseFactoryOptions {
+  mode?: SupabaseMode
+  url?: string
+  key?: string
+  persistSession?: boolean
+  autoRefreshToken?: boolean
+  databaseUrl?: string
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const DEFAULT_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const DATABASE_URL = process.env.DATABASE_URL 
 
-export const createServerClient = () => {
-  const key = supabaseServiceKey || supabaseAnonKey
-  
-  return createClient(supabaseUrl, key, {
+if (!DEFAULT_URL) throw new Error('NEXT_PUBLIC_SUPABASE_URL missing')
+if (!ANON_KEY) throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY missing')
+
+const deployedDatabases = new Set<string>()
+
+export async function getSupabaseClient(
+  options: SupabaseFactoryOptions = {}
+): Promise<SupabaseClient> {
+  const {
+    mode = 'public',
+    url,
+    key,
+    persistSession = false,
+    autoRefreshToken = false,
+    databaseUrl, 
+  } = options
+
+  const finalUrl = url || DEFAULT_URL
+  const finalKey = key || (mode === 'service' ? SERVICE_KEY : ANON_KEY)
+
+  if (!finalUrl || !finalKey) {
+    throw new Error('Supabase URL / Key missing')
+  }
+
+  if (!deployedDatabases.has(finalUrl)) {    
+    const pgUrl = databaseUrl || DATABASE_URL
+    if (pgUrl) {
+      const result = await autoDeployRPCFunctions(pgUrl)
+      if (result.success) {
+        deployedDatabases.add(finalUrl)
+        console.log('RPC functions deployed successfully')
+      } else {
+        console.error('RPC deployment failed:', result.message)
+      }
+    } else {
+      console.warn('No DATABASE_URL provided, skipping RPC deployment')
+    }
+  } else {
+    console.log("RPC functions Already Deployed")
+  }
+
+  return createClient(finalUrl, finalKey, {
     auth: {
-      persistSession: false,
-      autoRefreshToken: false,
+      persistSession,
+      autoRefreshToken,
     },
   })
-}
-
-let isRPCDeployed = false
-
-if (!isRPCDeployed) {
-  autoDeployRPCFunctions()
-    .then(result => {
-      if (result.success) {
-        isRPCDeployed = true
-        if (result.alreadyDeployed) {
-          console.log(' RPC functions already deployed')
-        } else {
-          console.log(' RPC functions deployed successfully')
-        }
-      } else {
-        console.error(' RPC deployment failed:', result.message)
-      }
-    })
-    .catch(error => {
-      console.error(' RPC deployment error:', error)
-    })
 }
