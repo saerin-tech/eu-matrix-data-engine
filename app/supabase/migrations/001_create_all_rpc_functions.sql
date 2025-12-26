@@ -1,5 +1,5 @@
 -- 1. Create databases storage table
-CREATE TABLE IF NOT EXISTS public.add_new_databases (
+CREATE TABLE IF NOT EXISTS public.databases_connections (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   connection_name text UNIQUE NOT NULL,
   supabase_url text NOT NULL,
@@ -74,7 +74,7 @@ BEGIN
   FROM information_schema.tables t
   WHERE t.table_schema = 'public'
     AND t.table_type = 'BASE TABLE'
-    AND t.table_name NOT IN ('add_new_databases')
+    AND t.table_name NOT IN ('databases_connections')
   ORDER BY t.table_name;
 END;
 $$;
