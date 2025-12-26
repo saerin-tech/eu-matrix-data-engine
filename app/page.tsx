@@ -190,7 +190,7 @@ export default function Page() {
     if (!selectedDatabaseId) return;
     
     setRefreshingDatabase(true);
-    await handleDatabaseChange(selectedDatabaseId);
+    await loadDatabases();
     setRefreshingDatabase(false);
   }
 
