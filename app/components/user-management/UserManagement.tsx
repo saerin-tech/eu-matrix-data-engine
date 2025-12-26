@@ -66,7 +66,7 @@ export default function UserManagement() {
       
       if (result.success) {
         setUsers(prevUsers =>
-            prevUsers.map(user => 
+            prevUsers?.map(user => 
             user.id === userId 
                 ? { ...user, is_enabled: result.data.isEnabled }
                 : user

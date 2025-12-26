@@ -92,7 +92,7 @@ export default function BackendPagination({
         )}
 
         {/* Page Number Buttons */}
-        {pageNumbers.map((page) => (
+        {pageNumbers?.map((page) => (
           <Button
             key={page}
             onClick={() => onPageChange(page)}

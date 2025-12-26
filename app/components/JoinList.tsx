@@ -13,7 +13,7 @@ export default function JoinList({ joins, selectedTable, onRemove }: Props) {
 
   return (
     <div className="mt-5 flex flex-col gap-2">
-      {joins.map((join, index) => (
+      {joins?.map((join, index) => (
         <div 
           key={index} 
           className="p-2 bg-blue-50 rounded-md border border-blue-200 flex justify-between items-center flex-wrap gap-2"

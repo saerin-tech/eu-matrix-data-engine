@@ -111,7 +111,6 @@ export default function ResultsTable({
       
     } catch (error) {
       console.error('Export failed:', error);
-      alert('Failed to export data. Please try again.');
     } finally {
       setIsExporting(false);
     }

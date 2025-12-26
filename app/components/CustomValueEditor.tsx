@@ -12,6 +12,7 @@ export default function CustomValueEditor({
     fieldData,
     operator,
     field,
+    context,
 }: ValueEditorProps) {
     // State
     const [searchTerm, setSearchTerm] = useState(value || '');
@@ -24,6 +25,11 @@ export default function CustomValueEditor({
 
     // Early return for operators that don't need values
     if (NO_VALUE_OPERATORS.includes(operator)) return null;
+
+    // Extract databaseId from context
+    const databaseId = useMemo(() => {
+        return (context as any)?.databaseId || 'default';
+    }, [context]);
 
     // Helper: Extract table and column
     const { tableName, columnName } = useMemo(() => {
@@ -62,6 +68,7 @@ export default function CustomValueEditor({
                     tableName,
                     columnName,
                     searchTerm: term,
+                    databaseId,
                 }),
             });
 
@@ -82,7 +89,7 @@ export default function CustomValueEditor({
         } finally {
             setLoading(false);
         }
-    }, [tableName, columnName]);
+    }, [tableName, columnName, databaseId]);
 
     // Auto-fetch on odd character counts
     useEffect(() => {

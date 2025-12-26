@@ -2,122 +2,155 @@
 import { useEffect, useState } from "react";
 import Input from "./shared/Input";
 
-interface Props {
-    table: string;
-    joins: any[];
-    onColumnsChange: (cols: { table: string; column: string; alias: string }[]) => void;
-}
-
 interface Column {
     table: string;
     column: string;
 }
 
-export default function ColumnSelector({ table, joins, onColumnsChange }: Props) {
+interface SelectedColumn {
+  table: string;
+  column: string;
+  alias: string;
+}
+
+interface Props {
+  table: string;
+  joins: any[];
+  databaseId?: string;
+  onColumnsChange: (cols: SelectedColumn[]) => void;
+}
+
+export default function ColumnSelector({ table, joins, databaseId, onColumnsChange }: Props) {
     const [columns, setColumns] = useState<Column[]>([]);
-    const [selected, setSelected] = useState<Record<string, { table: string; column: string; alias: string }>>({});
-                
-     // Fetch columns for a specific table
-        async function fetchCols(tbl: string) {
-    try {
-            const res = await fetch(`/api/columns`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tableName: tbl })
-            });
+    const [selected, setSelected] = useState<Record<string, SelectedColumn>>({});
+  const [loading, setLoading] = useState(false);
 
-            if (!res.ok) return [];
-            const data = await res.json();
-            return (data.columns || []).map((col: any) => ({
-                table: tbl,
-                column: col.name
-            }));
-    } catch (error) {
-      console.error(`Failed to fetch columns for ${tbl}:`, error);
-      return [];
+  // Reload columns when table, joins, or database changes
+  useEffect(() => {
+    if (table) {
+      loadColumns();
+    } else {
+      setColumns([]);
     }
-        }
+          }, [table, joins, databaseId]);
 
-  // Load columns from main table and all joined tables
         async function loadColumns() {
+    setLoading(true);
+
         const all: Column[] = [];
 
     // Fetch main table columns
-        const mainCols = await fetchCols(table);
+        const mainCols = await fetchColumnsForTable(table);
         all.push(...mainCols);
 
-    // Fetch joined tables columns
-        for (const j of joins) {
-            const cols = await fetchCols(j.targetTable);
+    // Fetch joined table columns
+        for (const join of joins) {
+            const cols = await fetchColumnsForTable(join.targetTable);
             all.push(...cols);
         }
 
         setColumns(all);
-        }
+    setLoading(false);
+  }
 
-  // Reload columns when table or joins change
-    useEffect(() => {
-    if (table) {
-        loadColumns();
+
+  async function fetchColumnsForTable(tableName: string): Promise<Column[]> {
+    try {
+      const response = await fetch('/api/columns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tableName, databaseId }),
+      });
+
+      if (!response.ok) return [];
+
+      const data = await response.json();
+      return (data.columns || [])?.map((col: any) => ({
+        table: tableName,
+        column: col.name,
+      }));
+    } catch (error) {
+      console.error(`Failed to fetch columns for ${tableName}:`, error);
+      return [];
     }
-    }, [table, joins]);
+  }
 
-  // Toggle column selection
-    const toggle = (tbl: string, col: string) => {
-        const key = `${tbl}.${col}`;
+  function toggleColumn(tableName: string, columnName: string) {
+    const key = `${tableName}.${columnName}`;
         const updated = { ...selected };
 
         if (updated[key]) {
             delete updated[key];
         } else {
-            updated[key] = { table: tbl, column: col, alias: `${tbl}_${col}` };
+            updated[key] = {
+        table: tableName,
+        column: columnName,
+        alias: `${tableName}_${columnName}`,
+      };
         }
 
         setSelected(updated);
         onColumnsChange(Object.values(updated));
     };
 
-    const changeAlias = (tbl: string, col: string, value: string) => {
-        const key = `${tbl}.${col}`;
+  function updateAlias(tableName: string, columnName: string, alias: string) {
+        const key = `${tableName}.${columnName}`;
         const updated = { ...selected };
         if (updated[key]) {
-            updated[key].alias = value;
+            updated[key].alias = alias;
             setSelected(updated);
             onColumnsChange(Object.values(updated));
         }
-    };
+  }
+
+  // Render states
+  if (loading) {
+    return (
+      <div className="bg-white shadow-md rounded-xl p-2 py-10 mt-3 border border-gray-200 min-h-[300px] max-h-[300px] flex items-center justify-center">
+        <p className="text-gray-500">Loading columns...</p>
+      </div>
+    );
+  }
+
+  if (columns.length === 0) {
+    return (
+      <div className="bg-white shadow-md rounded-xl p-2 py-10 mt-3 border border-gray-200 min-h-[300px] max-h-[300px] flex items-center justify-center">
+        <p className="text-gray-400">No columns available</p>
+      </div>
+    );
+  }
 
     return (
-        <div className="bg-white shadow-md rounded-xl p-2 py-10 mt-3 border border-gray-200 min-h-[300px] max-h-[300px] overflow-y-auto overflow-x-auto"> 
+        <div className="bg-white shadow-md rounded-xl p-2 py-10 mt-3 border border-gray-200 min-h-[300px] max-h-[300px] overflow-y-auto overflow-x-auto">
     <div className="flex flex-col gap-2">
-        {columns.map((c, i) => {
-            const key = `${c.table}.${c.column}`;
+        {columns?.map((col, index) => {
+            const key = `${col.table}.${col.column}`;
             const selectedCol = selected[key];
 
             return (
                 <div
-                    key={i}
+                    key={index}
                     className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition h-auto min-h-[32px]"
                 >
-              {/* Column Checkbox and Name */}
+              {/* Checkbox and Column Name */}
               <div className="flex items-center gap-2 flex-1 min-w-0">
                         <input
                             type="checkbox"
                             checked={!!selectedCol}
-                            onChange={() => toggle(c.table, c.column)}
+                            onChange={() => toggleColumn(col.table, col.column)}
                             className="w-4 h-4 text-blue-500 rounded focus:ring-2 focus:ring-blue-300 flex-shrink-0"
                         />
                         <span className="text-gray-700 font-medium text-sm truncate">
-                            {c.table}.{c.column}
+                            {col.table}.{col.column}
                         </span>
                     </div>
 
-              {/* Alias Input (only visible when selected) */}
+              {/* Alias Input (visible when selected) */}
                     {selectedCol && (
                         <div className="flex-shrink-0 w-52 ml-2">
                         <Input
                             value={selectedCol.alias}
-                            onChange={(e) => changeAlias(c.table, c.column, e.target.value)}
+                            onChange={(e) => updateAlias(col.table, col.column, e.target.value)}
                             placeholder="Alias"
                         />
                 </div>

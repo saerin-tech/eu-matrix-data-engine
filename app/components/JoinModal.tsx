@@ -51,7 +51,7 @@ export default function JoinModal({
             className="w-full p-2.5 text-base rounded-md border border-gray-300 bg-white text-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">-- Select table --</option>
-            {tables.filter(t => t !== selectedTable).map(table => (
+            {tables.filter(t => t !== selectedTable)?.map(table => (
               <option key={table} value={table}>{table}</option>
             ))}
           </select>
@@ -68,7 +68,7 @@ export default function JoinModal({
             className="w-full p-2.5 text-base rounded-md border border-gray-300 bg-white text-gray-800 cursor-pointer disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">-- Select column --</option>
-            {(availableColumns[selectedTable] || []).map(col => (
+            {(availableColumns[selectedTable] || [])?.map(col => (
               <option key={col} value={col}>{col}</option>
             ))}
           </select>
@@ -85,7 +85,7 @@ export default function JoinModal({
             className="w-full p-2.5 text-base rounded-md border border-gray-300 bg-white text-gray-800 cursor-pointer disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">-- Select column --</option>
-            {(availableColumns[join.targetTable] || []).map(col => (
+            {(availableColumns[join.targetTable] || [])?.map(col => (
               <option key={col} value={col}>{col}</option>
             ))}
           </select>

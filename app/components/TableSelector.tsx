@@ -27,7 +27,7 @@ export default function TableSelector({
   joins,
   onRemoveJoin
 }: Props) {
-  const tableOptions = tables.map(table => ({
+  const tableOptions = tables?.map(table => ({
     value: table,
     label: table
   }));

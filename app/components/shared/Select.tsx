@@ -48,7 +48,7 @@ export default function Select({
         )}
         
         {/* Options */}
-        {options.map((opt) => (
+        {options?.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>

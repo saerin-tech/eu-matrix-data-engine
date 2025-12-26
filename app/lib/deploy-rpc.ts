@@ -1,25 +1,29 @@
 import fs from 'fs'
 import path from 'path'
-import { Pool } from 'pg';
-
+import { Pool } from 'pg'
 
 export async function autoDeployRPCFunctions(databaseUrl?: string): Promise<{
   success: boolean
   message: string
   alreadyDeployed: boolean
 }> {
+  const dbUrl = databaseUrl || process.env.DATABASE_URL
 
-  const dbUrl = databaseUrl || process.env.DATABASE_URL;
   if (!dbUrl) {
-    throw new Error('DATABASE_URL not found');
+    throw new Error('DATABASE_URL not found')
   }
 
-  const pool = new Pool({
-    connectionString: dbUrl,
-    ssl: { rejectUnauthorized: false }
-  });
+  let pool: Pool | null = null
 
   try {
+    pool = new Pool({
+      connectionString: dbUrl,
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 10000,
+    })
+
+    await pool.query('SELECT 1')
+
     const sqlPath = path.join(
       process.cwd(),
       'app',
@@ -31,26 +35,30 @@ export async function autoDeployRPCFunctions(databaseUrl?: string): Promise<{
     if (!fs.existsSync(sqlPath)) {
       throw new Error(`SQL file not found at: ${sqlPath}`)
     }
-    const sql = fs.readFileSync(sqlPath, 'utf-8');
-     await pool.query(sql);
+
+    const sql = fs.readFileSync(sqlPath, 'utf-8')
     
-    console.log('SUCCESS: All RPC functions deployed in Database')
+    await pool.query(sql)
+    console.log('SQL executed successfully')
 
     return {
       success: true,
       message: 'RPC functions deployed successfully',
-      alreadyDeployed: false
+      alreadyDeployed: false,
     }
-
   } catch (error: any) {
-    console.error('FAILED:', error.message)
+    console.error('DEPLOYMENT FAILED:', error.message)
+    console.error('Stack:', error.stack)
+    
     return {
       success: false,
       message: `Deployment failed: ${error.message}`,
-      alreadyDeployed: false
+      alreadyDeployed: false,
     }
-  }finally{
-   await pool.end()
+  } finally {
+    if (pool) {
+      await pool.end()
+
+    }
   }
 }
-

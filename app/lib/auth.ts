@@ -1,12 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '../lib/supabase'
 import { AuthResponse } from '../types/auth';
 import bcrypt from 'bcryptjs';
-import { autoDeployRPCFunctions } from './deploy-rpc';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export type UserRole = 'Admin' | 'User';
 
@@ -24,6 +18,7 @@ function generateSecurePassword(): string {
 // Seed initial admin user
 export async function seedUser(): Promise<AuthResponse> {
   try {
+    const supabase = await  getSupabaseClient({ mode: 'service' })
     // Check if admin exists
     const { data: existingUsers, error: checkError } = await supabase
       .from('users')
@@ -98,6 +93,7 @@ export async function seedUser(): Promise<AuthResponse> {
 // Validate user login credentials
 export async function validateLogin(user_name: string, user_password: string): Promise<AuthResponse> {
   try {
+    const supabase = await getSupabaseClient({ mode: 'service' })
     const { data: user, error } = await supabase
       .from('users')
       .select('id, user_name, user_password, roles_and_rights, is_enabled, first_name, last_name')
@@ -155,6 +151,7 @@ export async function createUser(
   try {
 
     // Check if username already exists
+    const supabase = await getSupabaseClient({ mode: 'service' })
     const { data: existingUser } = await supabase
       .from('users')
       .select('id')
