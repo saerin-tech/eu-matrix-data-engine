@@ -1,6 +1,6 @@
 -- 1. Create databases storage table
 CREATE TABLE IF NOT EXISTS public.databases_connections (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id SERIAL PRIMARY KEY,
   connection_name text UNIQUE NOT NULL,
   supabase_url text NOT NULL,
   supabase_anon_key text NOT NULL,
