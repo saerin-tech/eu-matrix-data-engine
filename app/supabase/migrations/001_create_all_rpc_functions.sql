@@ -133,15 +133,3 @@ BEGIN
   );
 END;
 $$;
-
-
-
-CREATE OR REPLACE FUNCTION public.hello_world()
-RETURNS text
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  RETURN 'Hello, World!';
-END;
-$$;
