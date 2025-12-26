@@ -1,21 +1,4 @@
--- 1. Create databases storage table
-CREATE TABLE IF NOT EXISTS public.databases_connections (
-  id SERIAL PRIMARY KEY,
-  connection_name text UNIQUE NOT NULL,
-  supabase_url text NOT NULL,
-  supabase_anon_key text NOT NULL,
-  database_url text NOT NULL,
-  supabase_service_role_key text,
-  is_default boolean DEFAULT false,
-  is_active boolean DEFAULT true,
-  connection_status text DEFAULT 'disconnected',
-  last_tested_at timestamptz,
-  created_by text,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-
--- 2. Get filtered search values for autocomplete
+-- 1. Get filtered search values for autocomplete
 CREATE OR REPLACE FUNCTION public.get_filtered_search_values_text_num(
   p_table_name text,
   p_column_name text,
@@ -62,7 +45,7 @@ BEGIN
 END;
 $$;
 
--- 3. Get tables
+-- 2. Get tables
 CREATE OR REPLACE FUNCTION public.get_tables_list()
 RETURNS TABLE(table_name text)
 LANGUAGE plpgsql
@@ -74,12 +57,12 @@ BEGIN
   FROM information_schema.tables t
   WHERE t.table_schema = 'public'
     AND t.table_type = 'BASE TABLE'
-    AND t.table_name NOT IN ('databases_connections')
+    AND t.table_name NOT IN ('database_connections')
   ORDER BY t.table_name;
 END;
 $$;
 
--- 4. Get table columns
+-- 3. Get table columns
 CREATE OR REPLACE FUNCTION public.get_table_columns(p_table_name text)
 RETURNS TABLE (
   column_name text,
@@ -100,7 +83,7 @@ BEGIN
 END;
 $$;
 
--- 5. Execute dynamic SELECT query
+-- 4. Execute dynamic SELECT query
 CREATE EXTENSION IF NOT EXISTS unaccent;
 CREATE OR REPLACE FUNCTION public.execute_dynamic_query(p_query_text text)
 RETURNS SETOF json

@@ -13,7 +13,7 @@ export async function createDatabaseClient(databaseId?: string) {
     const defaultSupabase = await getSupabaseClient({ mode: 'service' })
 
     const { data, error } = await defaultSupabase
-      .from('databases_connections')
+      .from('database_connections')
       .select(
         'supabase_url, supabase_service_role_key, supabase_anon_key, database_url' 
       )

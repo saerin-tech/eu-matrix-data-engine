@@ -49,7 +49,7 @@ async function getDatabaseInfo(databaseId: string): Promise<any | null> {
   })
 
   const { data, error } = await supabase
-    .from('databases_connections')
+    .from('database_connections')
     .select('*')
     .eq('id', databaseId)
     .single()

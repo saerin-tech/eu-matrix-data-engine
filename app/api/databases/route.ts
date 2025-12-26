@@ -10,7 +10,7 @@ export async function GET() {
 
     // Get custom databases
     const { data: customDatabases, error } = await supabase
-      .from('databases_connections')
+      .from('database_connections')
       .select('*') 
       .order('created_at', { ascending: false }) 
 

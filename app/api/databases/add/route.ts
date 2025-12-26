@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     // Check for duplicate name
     const { data: existing, error: checkError } = await supabase
-      .from('databases_connections')
+      .from('database_connections')
       .select('id')
       .eq('connection_name', name)
       .maybeSingle();
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // Insert new database
     const { data, error } = await supabase
-      .from('databases_connections')
+      .from('database_connections')
       .insert({
         connection_name: name,
         supabase_url,
