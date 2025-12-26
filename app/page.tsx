@@ -158,6 +158,7 @@ export default function Page() {
   setFields([])
   setData([])
   setJoins([])
+  setQueryExecuted(false)
   setError(null)
   
   try {
