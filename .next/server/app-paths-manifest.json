@@ -1,0 +1,21 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/create-user/route": "app/api/auth/create-user/route.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/auth/seed/route": "app/api/auth/seed/route.js",
+  "/api/columns/route": "app/api/columns/route.js",
+  "/api/databases/add/route": "app/api/databases/add/route.js",
+  "/api/databases/deploy/route": "app/api/databases/deploy/route.js",
+  "/api/databases/route": "app/api/databases/route.js",
+  "/api/databases/test/route": "app/api/databases/test/route.js",
+  "/api/query/route": "app/api/query/route.js",
+  "/api/sql-api/route": "app/api/sql-api/route.js",
+  "/api/tables/route": "app/api/tables/route.js",
+  "/api/users/List/route": "app/api/users/List/route.js",
+  "/api/users/toggle-status/route": "app/api/users/toggle-status/route.js",
+  "/api/users/update/route": "app/api/users/update/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js"
+}

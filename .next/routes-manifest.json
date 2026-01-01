@@ -1,0 +1,158 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/api/auth/create-user",
+      "regex": "^/api/auth/create\\-user(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/create\\-user(?:/)?$"
+    },
+    {
+      "page": "/api/auth/login",
+      "regex": "^/api/auth/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/login(?:/)?$"
+    },
+    {
+      "page": "/api/auth/seed",
+      "regex": "^/api/auth/seed(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/seed(?:/)?$"
+    },
+    {
+      "page": "/api/columns",
+      "regex": "^/api/columns(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/columns(?:/)?$"
+    },
+    {
+      "page": "/api/databases",
+      "regex": "^/api/databases(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/databases(?:/)?$"
+    },
+    {
+      "page": "/api/databases/add",
+      "regex": "^/api/databases/add(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/databases/add(?:/)?$"
+    },
+    {
+      "page": "/api/databases/deploy",
+      "regex": "^/api/databases/deploy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/databases/deploy(?:/)?$"
+    },
+    {
+      "page": "/api/databases/test",
+      "regex": "^/api/databases/test(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/databases/test(?:/)?$"
+    },
+    {
+      "page": "/api/query",
+      "regex": "^/api/query(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/query(?:/)?$"
+    },
+    {
+      "page": "/api/sql-api",
+      "regex": "^/api/sql\\-api(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/sql\\-api(?:/)?$"
+    },
+    {
+      "page": "/api/tables",
+      "regex": "^/api/tables(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/tables(?:/)?$"
+    },
+    {
+      "page": "/api/users/List",
+      "regex": "^/api/users/List(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/users/List(?:/)?$"
+    },
+    {
+      "page": "/api/users/toggle-status",
+      "regex": "^/api/users/toggle\\-status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/users/toggle\\-status(?:/)?$"
+    },
+    {
+      "page": "/api/users/update",
+      "regex": "^/api/users/update(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/users/update(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

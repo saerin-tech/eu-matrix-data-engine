@@ -1,0 +1,21 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/auth/create-user/route": "/api/auth/create-user",
+  "/api/auth/login/route": "/api/auth/login",
+  "/api/auth/seed/route": "/api/auth/seed",
+  "/api/columns/route": "/api/columns",
+  "/api/databases/add/route": "/api/databases/add",
+  "/api/databases/deploy/route": "/api/databases/deploy",
+  "/api/databases/route": "/api/databases",
+  "/api/databases/test/route": "/api/databases/test",
+  "/api/query/route": "/api/query",
+  "/api/sql-api/route": "/api/sql-api",
+  "/api/tables/route": "/api/tables",
+  "/api/users/List/route": "/api/users/List",
+  "/api/users/toggle-status/route": "/api/users/toggle-status",
+  "/api/users/update/route": "/api/users/update",
+  "/favicon.ico/route": "/favicon.ico",
+  "/login/page": "/login",
+  "/page": "/"
+}
