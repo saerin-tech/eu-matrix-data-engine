@@ -47,8 +47,8 @@ bun install
 
 Create a `.env.local` file in the root directory:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 Replace with your actual Supabase project credentials found in your [Supabase Dashboard](https://app.supabase.com/) under Settings → API.
@@ -244,7 +244,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 **Connection Failed**
 - Verify your `.env.local` file has correct Supabase credentials
-- Check that `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set
+- Check that `SUPABASE_URL` and `SUPABASE_ANON_KEY` are set
 - Restart the development server after adding environment variables
 
 **No tables showing**

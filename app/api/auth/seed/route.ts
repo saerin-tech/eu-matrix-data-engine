@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     
   try {
     // Check if seeding is enabled
-    if (process.env.NEXT_PUBLIC_SEED !== 'TRUE') {
+    if (process.env.SEED !== 'TRUE') {
       return NextResponse.json(
         { success: false, message: 'SEED is not TRUE in .env' },
         { status: 403 }
