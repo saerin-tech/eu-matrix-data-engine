@@ -63,7 +63,7 @@ export async function POST(request: Request) {
         );
       }
 
-    const isDebugMode = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true';
+    const isDebugMode = process.env.DEBUG_MODE === 'true';
 
       return NextResponse.json({ 
         success: true, 

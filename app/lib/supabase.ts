@@ -12,13 +12,13 @@ interface SupabaseFactoryOptions {
   databaseUrl?: string
 }
 
-const DEFAULT_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const DEFAULT_URL = process.env.SUPABASE_URL!
+const ANON_KEY = process.env.SUPABASE_ANON_KEY!
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const DATABASE_URL = process.env.DATABASE_URL 
 
-if (!DEFAULT_URL) throw new Error('NEXT_PUBLIC_SUPABASE_URL missing')
-if (!ANON_KEY) throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY missing')
+if (!DEFAULT_URL) throw new Error('SUPABASE_URL missing')
+if (!ANON_KEY) throw new Error('SUPABASE_ANON_KEY missing')
 
 const deployedDatabases = new Set<string>()
 

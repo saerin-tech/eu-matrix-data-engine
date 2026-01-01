@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 describe('Database Connection Tests', () => {
   describe('Supabase Client Initialization', () => {
     it('should initialize with correct environment variables', () => {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const url = process.env.SUPABASE_URL;
+      const key = process.env.SUPABASE_ANON_KEY;
 
       expect(url).toBeDefined();
       expect(key).toBeDefined();
@@ -13,8 +13,8 @@ describe('Database Connection Tests', () => {
 
     it('should create client with valid credentials', () => {
       const client = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_ANON_KEY!
       );
 
       expect(client).toBeDefined();
