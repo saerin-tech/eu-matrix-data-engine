@@ -479,7 +479,7 @@ export default function Page() {
         ) : (
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <p className="text-red-400 text-lg font-semibold mb-2">Failed to connect to database</p>
+               <p className="text-red-400 text-lg font-semibold mb-2">Failed to connect to database</p>
               <p className="text-gray-400 text-sm">Please check your database configuration</p>
             </div>
           </div>
