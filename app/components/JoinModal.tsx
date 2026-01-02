@@ -1,4 +1,5 @@
 import { JoinConfig } from '../types';
+import Button from './shared/Button';
 
 interface Props {
   show: boolean;
@@ -92,19 +93,19 @@ export default function JoinModal({
         </div>
 
         <div className="flex gap-2 justify-end">
-          <button
+          <Button
             onClick={onClose}
-            className="px-5 py-2.5 bg-gray-600 text-white border-none rounded-md cursor-pointer text-sm hover:bg-gray-700"
+            variant='info'
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onAdd}
             disabled={!join.targetTable || !join.sourceColumn || !join.targetColumn}
-            className="px-5 py-2.5 bg-blue-600 text-white border-none rounded-md cursor-pointer text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            variant='success'
           >
             Add JOIN
-          </button>
+          </Button>
         </div>
       </div>
     </div>

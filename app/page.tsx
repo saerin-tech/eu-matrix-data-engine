@@ -303,26 +303,7 @@ export default function Page() {
     return null;
   }
 
-  // Show User Management component if active
-  if (showUserManagement) {
-    return (
-      <div className="min-h-screen flex flex-col p-3 sm:p-5 max-w-[1400px] mx-auto">
-        <Header 
-          userEmail={userEmail}
-          userRole={userRole}
-          onLogout={handleLogout}
-          onCreateUser={() => setShowCreateUserModal(true)}
-          onManageUsers={() => setShowUserManagement(true)}
-          onAddDatabase={() => setShowAddDatabaseModal(true)}
-          organizationName={process.env.NEXT_PUBLIC_ORGANIZATION}
-          organizationSubHeading={process.env.NEXT_PUBLIC_ORGANIZATION_SUB_HEADING}
-        />
-        <UserManagement />
-        <Footer />
-      </div>
-    );
-  }
-
+  //Render modals OUTSIDE the conditional returns
   return (
     <div className="min-h-screen flex flex-col p-3 sm:p-5 max-w-[1400px] mx-auto">
       
@@ -350,6 +331,19 @@ export default function Page() {
         onDatabaseAdded={loadDatabases}
       />
 
+      {/* Conditionally render main content OR user management */}
+      {showUserManagement ? (
+        /* User Management View */
+        <>
+          <UserManagement 
+            key="user-management"
+            onBack={() => setShowUserManagement(false)}
+          />
+          <Footer />
+        </>
+      ) : (
+        /* Main Query Builder View */
+        <>
       <main className="flex-grow">
         {/* Database Selector with Refresh Button - Screenshot Style */}
         <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 border border-slate-600 rounded-xl p-4 mb-0 shadow-lg">
@@ -479,7 +473,7 @@ export default function Page() {
         ) : (
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <p className="text-red-400 text-lg font-semibold mb-2">Failed to connect to database</p>
+               <p className="text-red-400 text-lg font-semibold mb-2">Failed to connect to database</p>
               <p className="text-gray-400 text-sm">Please check your database configuration</p>
             </div>
           </div>
@@ -487,6 +481,7 @@ export default function Page() {
       </main>
 
       <Footer />
+        </>)}
     </div>
   );
 }

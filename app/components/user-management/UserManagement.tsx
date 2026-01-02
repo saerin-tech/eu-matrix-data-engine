@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Users, AlertCircle } from 'lucide-react';
+import { Users, AlertCircle, ArrowLeft } from 'lucide-react';
 import UserTable from './UserTable';
 import EditUserModal from './EditUserModal';
+import Button from '../shared/Button';
 import { User, PaginationMeta, UsersResponse, UpdateUserData } from '../../types/user';
 
-export default function UserManagement() {
+interface UserManagementProps {
+  onBack?: () => void; 
+}
+export default function UserManagement({ onBack }: UserManagementProps) {
   // State management
   const [users, setUsers] = useState<User[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({
@@ -23,7 +27,7 @@ export default function UserManagement() {
     setError(null);
     
     try {
-      const response = await fetch(`/api/users/List?page=${page}&limit=${limit}`);
+      const response = await fetch(`/api/users/list?page=${page}&limit=${limit}`);
       const result: UsersResponse = await response.json();
         
       if (result.success) {
@@ -33,7 +37,8 @@ export default function UserManagement() {
         setError(result.message || 'Failed to fetch users');
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      console.error('Fetch Users Error:', err);
+      setError(err instanceof Error ? err.message : 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -99,6 +104,7 @@ export default function UserManagement() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+        <div className='flex justify-between'>
         {/* Page Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
@@ -107,7 +113,20 @@ export default function UserManagement() {
           </div>
           <p className="text-gray-600">Manage user accounts, roles, and access</p>
         </div>
+        {/*Back Button */}
+        {onBack && (
+          <div className="mb-4">
+            <Button
+              onClick={onBack}
+              variant="primary"
+              icon={<ArrowLeft className="w-4 h-4" />}
+            >
+              Back to Query Builder
+            </Button>
+          </div>
+        )}
 
+            </div>
         {/* Error Message */}
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 flex items-center gap-2">

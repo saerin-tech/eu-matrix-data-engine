@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
           success: false,
           users: [],
           meta: { currentPage: 1, itemsPerPage: 10, totalItems: 0, totalPages: 0 },
-          message: 'Failed to count users'
+          message: 'Failed to count users: ' + countError.message
         },
         { status: 500 }
       );
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
           success: false,
           users: [],
           meta: { currentPage: page, itemsPerPage: limit, totalItems, totalPages },
-          message: 'Failed to fetch users'
+          message: 'Failed to fetch users: ' + error.message
         },
         { status: 500 }
       );

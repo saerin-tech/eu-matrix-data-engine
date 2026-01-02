@@ -121,12 +121,12 @@ export default function Header({
             </div>
 
             {/* Mobile Menu Button */}
-            <button
+            <Button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 text-white hover:bg-slate-800/60 rounded-lg transition-colors"
+              variant="info"
             >
               <Menu className="w-6 h-6" />
-            </button>
+            </Button>
           </div>
 
           {/* Mobile Dropdown */}
