@@ -106,10 +106,10 @@
       "namedRegex": "^/api/tables(?:/)?$"
     },
     {
-      "page": "/api/users/List",
-      "regex": "^/api/users/List(?:/)?$",
+      "page": "/api/users/list",
+      "regex": "^/api/users/list(?:/)?$",
       "routeKeys": {},
-      "namedRegex": "^/api/users/List(?:/)?$"
+      "namedRegex": "^/api/users/list(?:/)?$"
     },
     {
       "page": "/api/users/toggle-status",

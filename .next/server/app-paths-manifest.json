@@ -12,7 +12,7 @@
   "/api/query/route": "app/api/query/route.js",
   "/api/sql-api/route": "app/api/sql-api/route.js",
   "/api/tables/route": "app/api/tables/route.js",
-  "/api/users/List/route": "app/api/users/List/route.js",
+  "/api/users/list/route": "app/api/users/list/route.js",
   "/api/users/toggle-status/route": "app/api/users/toggle-status/route.js",
   "/api/users/update/route": "app/api/users/update/route.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",

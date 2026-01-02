@@ -12,7 +12,7 @@
   "/api/query/route": "/api/query",
   "/api/sql-api/route": "/api/sql-api",
   "/api/tables/route": "/api/tables",
-  "/api/users/List/route": "/api/users/List",
+  "/api/users/list/route": "/api/users/list",
   "/api/users/toggle-status/route": "/api/users/toggle-status",
   "/api/users/update/route": "/api/users/update",
   "/favicon.ico/route": "/favicon.ico",
