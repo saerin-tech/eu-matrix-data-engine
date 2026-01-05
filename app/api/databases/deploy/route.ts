@@ -44,9 +44,7 @@ async function getDatabaseInfo(databaseId: string): Promise<any | null> {
   }
 
   // Fetch from database
-  const supabase = await  getSupabaseClient({
-    mode: 'service',
-  })
+  const supabase = await  getSupabaseClient()
 
   const { data, error } = await supabase
     .from('database_connections')

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     // Use service mode to bypass RLS
-    const supabase = await getSupabaseClient({ mode: 'service' });
+    const supabase = await getSupabaseClient();
 
     // Check for duplicate name
     const { data: existing, error: checkError } = await supabase

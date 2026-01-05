@@ -4,9 +4,7 @@ import { getSupabaseClient } from '../../lib/supabase'
 export async function GET() {
   try {
 
-      const supabase = await getSupabaseClient({
-      mode: 'service',
-    })
+      const supabase = await getSupabaseClient()
 
     // Get custom databases
     const { data: customDatabases, error } = await supabase
