@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '../../../lib/supabase'
+import { getCurrentUser } from '../../../lib/auth';
 
 interface AddDatabaseRequest {
   name: string;
@@ -11,6 +12,14 @@ interface AddDatabaseRequest {
 
 export async function POST(request: Request) {
   try {
+     const currentUser = await getCurrentUser();
+    
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Please login first' },
+        { status: 401 }
+      );
+    }
     const body: AddDatabaseRequest = await request.json();
     const { name, supabase_url, supabase_anon_key, database_url, service_role_key } = body;
 
@@ -30,6 +39,7 @@ export async function POST(request: Request) {
       .from('database_connections')
       .select('id')
       .eq('connection_name', name)
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (checkError && checkError.code !== 'PGRST116') {
@@ -56,7 +66,10 @@ export async function POST(request: Request) {
         is_active: true,
         connection_status: 'disconnected',
         last_tested_at: null,
-        created_by: null,
+        created_by: currentUser.user_name,
+         is_deleted: false,
+        deleted_by: null,
+        deleted_at: null
       })
       .select()
       .single();

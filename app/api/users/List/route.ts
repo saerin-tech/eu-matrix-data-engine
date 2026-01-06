@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
     // Count total users
     const { count, error: countError } = await supabase
       .from('users')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('is_deleted', false);
 
     if (countError) {
       console.error('Count error:', countError);
@@ -51,6 +52,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from('users')
       .select('*')
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false })
       .range(from, to);
 

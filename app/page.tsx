@@ -17,6 +17,7 @@ import Select from './components/shared/Select';
 import Button from './components/shared/Button';
 import { Database, JoinConfig, ConnectionStatus as Status, UserRole } from './types';
 import { useQueryBuilder } from './hooks/useQueryBuilder';
+import DatabaseManagement from './components/database/DatabaseManagement';
 
 const INITIAL_QUERY: RuleGroupType = { combinator: 'and', rules: [] };
 
@@ -27,11 +28,10 @@ export default function Page() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [userRole, setUserRole] = useState<UserRole>('User');
-
+  const [currentView, setCurrentView] = useState<'main' | 'users' | 'databases'>('main');
   // Modal state
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [showAddDatabaseModal, setShowAddDatabaseModal] = useState(false);
-  const [showUserManagement, setShowUserManagement] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
 
   // Database state
@@ -303,7 +303,7 @@ export default function Page() {
     return null;
   }
 
-  //Render modals OUTSIDE the conditional returns
+  // MODIFIED: Simplified view rendering logic using single state
   return (
     <div className="min-h-screen flex flex-col p-3 sm:p-5 max-w-[1400px] mx-auto">
       
@@ -311,13 +311,23 @@ export default function Page() {
         userEmail={userEmail}
         userRole={userRole}
         onLogout={handleLogout}
-        onCreateUser={() => setShowCreateUserModal(true)}
-        onManageUsers={() => setShowUserManagement(true)}
-        onAddDatabase={() => setShowAddDatabaseModal(true)}
+        onCreateUser={() => {
+          setCurrentView('main');
+          setShowCreateUserModal(true);
+        }}
+
+        onManageUsers={() => setCurrentView('users')}
+
+        onAddDatabase={() => {
+          setCurrentView('main');
+          setShowAddDatabaseModal(true);
+        }}
+        onManageDatabases={() => setCurrentView('databases')}
         organizationName={process.env.NEXT_PUBLIC_ORGANIZATION}
         organizationSubHeading={process.env.NEXT_PUBLIC_ORGANIZATION_SUB_HEADING}
       />
 
+      <div className="relative z-[200]">
       <CreateUserModal
           show={showCreateUserModal}
           creatorRole={userRole}
@@ -331,13 +341,42 @@ export default function Page() {
         onDatabaseAdded={loadDatabases}
       />
 
-      {/* Conditionally render main content OR user management */}
-      {showUserManagement ? (
+        <JoinModal
+          show={showJoinModal}
+          join={newJoin}
+          tables={tables}
+          selectedTable={selectedTable}
+          availableColumns={availableColumns}
+          onClose={() => {
+            setShowJoinModal(false);
+            setNewJoin({ type: 'INNER', targetTable: '', sourceColumn: '', targetColumn: '' });
+          }}
+          onJoinChange={setNewJoin}
+          onTargetTableChange={handleTargetTableChange}
+          onAdd={handleAddJoin}
+        />
+      </div>
+
+      {/* MODIFIED: Simplified conditional rendering using currentView state */}
+      {currentView === 'users' ? (
         /* User Management View */
         <>
           <UserManagement 
             key="user-management"
-            onBack={() => setShowUserManagement(false)}
+            // MODIFIED: Return to main view instead of just hiding
+            onBack={() => setCurrentView('main')}
+          />
+          <Footer />
+        </>
+      ) : currentView === 'databases' ? (
+
+        <>
+          <DatabaseManagement 
+            key="database-management"
+            onBack={() => {
+              setCurrentView('main');
+              loadDatabases(); 
+            }}
           />
           <Footer />
         </>
@@ -446,21 +485,6 @@ export default function Page() {
               setItemsPerPage(items); 
               setCurrentPage(1);
             }}
-          />
-
-          <JoinModal
-            show={showJoinModal}
-            join={newJoin}
-            tables={tables}
-            selectedTable={selectedTable}
-            availableColumns={availableColumns}
-            onClose={() => {
-              setShowJoinModal(false);
-              setNewJoin({ type: 'INNER', targetTable: '', sourceColumn: '', targetColumn: '' });
-            }}
-            onJoinChange={setNewJoin}
-            onTargetTableChange={handleTargetTableChange}
-            onAdd={handleAddJoin}
           />
           </>
         ) : connectionStatus === 'checking' ? (

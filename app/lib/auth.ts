@@ -1,8 +1,33 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { AuthResponse } from '../types/auth';
 import bcrypt from 'bcryptjs';
+import { cookies } from 'next/headers';
 
 export type UserRole = 'Admin' | 'User';
+
+export interface AuthUser {
+  id: string;
+  user_name: string;
+  roles_and_rights: any;
+  is_enabled: boolean;
+}
+
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  try {
+    const cookieStore = await cookies();
+    const userSession = cookieStore.get('user_session');
+    
+    if (!userSession?.value) {
+      return null;
+    }
+    
+    const user: AuthUser = JSON.parse(userSession.value);
+    return user;
+  } catch (error) {
+    console.error('Get current user error:', error);
+    return null;
+  }
+}
 
 // Generate secure random password
 function generateSecurePassword(): string {
@@ -121,6 +146,21 @@ export async function validateLogin(user_name: string, user_password: string): P
         message: 'Your account has been disabled. Please contact your administrator.'
       };
     }
+
+    // Set session cookie
+    const cookieStore = await cookies();
+    const userSession = {
+      id: user.id,
+      user_name: user.user_name,
+      roles_and_rights: user.roles_and_rights,
+    };
+    
+    cookieStore.set('user_session', JSON.stringify(userSession), {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 
+    });    
     return {
       success: true,
       message: 'Login successful',

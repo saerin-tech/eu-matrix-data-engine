@@ -6,6 +6,7 @@ export interface Database {
   database_url: string;
   service_role_key?: string; 
   is_default: boolean;
+  is_deleted?: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -1,4 +1,4 @@
-import { LogOut, Sparkles, Menu, UserPlus, Users, DatabaseIcon } from "lucide-react";
+import { LogOut, Sparkles, Menu, UserPlus, Users, DatabaseIcon, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import Button from "./shared/Button";
 
@@ -11,6 +11,7 @@ interface HeaderProps {
   onCreateUser: () => void;
   onManageUsers: () => void;
   onAddDatabase: () => void;
+  onManageDatabases: () => void;
   organizationName?: string;
   organizationSubHeading?: string;
 }
@@ -22,19 +23,27 @@ export default function Header({
   onCreateUser,
   onManageUsers,
   onAddDatabase,
+  onManageDatabases,
   organizationName, 
   organizationSubHeading 
 }: HeaderProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showDatabaseMenu, setShowDatabaseMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const isAdmin = userRole === 'Admin';
   const userInitial = userEmail.charAt(0).toUpperCase();
 
   return (
-    <header className="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl mb-4 sm:mb-6 relative overflow-hidden">
+  <div onClick={() => {
+    setShowDatabaseMenu(false);
+    setShowUserMenu(false);
+  }}>
+    <header className="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xl mb-4 sm:mb-6 relative z-50">
       {/* Animated gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10 animate-pulse"></div>
       
-      <div className="relative">
+      {/* MODIFIED: Added onClick with stopPropagation to prevent closing when clicking inside header */}
+      <div className="relative" onClick={(e) => e.stopPropagation()}>
         {/* Desktop Layout */}
         <div className="hidden md:flex justify-between items-center">
           {/* LEFT — TITLE with icon */}
@@ -70,29 +79,87 @@ export default function Header({
             {/* Create User Button (Admin Only) */}
             {isAdmin && (
               <>
+              {/* Database Dropdown Menu */}
+              <div className="relative">
                 <Button
-                  onClick={onAddDatabase}
+                  onClick={() => {
+                    setShowDatabaseMenu(!showDatabaseMenu);
+                    setShowUserMenu(false);
+                  }}
                   variant="warning"
                   icon={<DatabaseIcon className="w-4 h-4" />}
                 >
-                  <span className="hidden xl:inline">Add Database</span>
+                  <span className="hidden xl:inline">Database</span>
+                  <ChevronDown className="w-4 h-4 ml-1" />
                 </Button>
 
+                    {/* Database Dropdown */}
+                    {showDatabaseMenu && (
+                      <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[100]">
+                        <button
+                          onClick={() => {
+                            onAddDatabase();
+                            setShowDatabaseMenu(false);
+                          }}
+                          className="w-full px-4 py-3 cursor-pointer text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-700"
+                        >
+                          <DatabaseIcon className="w-4 h-4 text-yellow-400" />
+                          <span className="text-sm font-medium">Add Database</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            onManageDatabases();
+                            setShowDatabaseMenu(false);
+                          }}
+                          className="w-full px-4 py-3 cursor-pointer text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-3"
+                        >
+                          <DatabaseIcon className="w-4 h-4 text-blue-400" />
+                          <span className="text-sm font-medium">Manage Databases</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* User Dropdown Menu */}
+                  <div className="relative">
                 <Button
-                  onClick={onManageUsers}
+                  onClick={() => {
+                    setShowUserMenu(!showUserMenu);
+                    setShowDatabaseMenu(false);
+                  }}
                   variant="info"
                   icon={<Users className="w-4 h-4" />}
                 >
-                  <span className="hidden lg:inline">Manage Users</span>
+                  <span className="hidden xl:inline">Users</span>
+                  <ChevronDown className="w-4 h-4 ml-1" />
                 </Button>
 
-                <Button
-                  onClick={onCreateUser}
-                  variant="success"
-                  icon={<UserPlus className="w-4 h-4" />}
-                >
-                  <span className="hidden lg:inline">Create User</span>
-                </Button>
+                    {/* User Dropdown Menu */}
+                    {showUserMenu && (
+                      <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[100]">
+                        <button
+                          onClick={() => {
+                            onCreateUser();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full px-4 py-3 cursor-pointer text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-700"
+                        >
+                          <UserPlus className="w-4 h-4 text-green-400" />
+                          <span className="text-sm font-medium">Create User</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            onManageUsers();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full px-4 py-3 cursor-pointer text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-3"
+                        >
+                          <Users className="w-4 h-4 text-blue-400" />
+                          <span className="text-sm font-medium">Manage Users</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
               </>
             )}
 
@@ -147,11 +214,14 @@ export default function Header({
                 </div>
               </div>
 
-              {/* Create User Button (Admin Only) */}
+              {/* Admin Controls (Mobile) */}
               {isAdmin && (
                 <>
                   <Button
-                    onClick={onAddDatabase}
+                    onClick={() => {
+                      onAddDatabase();
+                      setShowMobileMenu(false);
+                    }}
                     variant="warning"
                     fullWidth
                     icon={<DatabaseIcon className="w-4 h-4" />}
@@ -160,7 +230,10 @@ export default function Header({
                   </Button>
 
                   <Button
-                    onClick={onManageUsers}
+                    onClick={() => {
+                      onManageUsers();
+                      setShowMobileMenu(false);
+                    }}
                     variant="info"
                     fullWidth
                     icon={<Users className="w-4 h-4" />}
@@ -169,7 +242,10 @@ export default function Header({
                   </Button>
 
                   <Button
-                    onClick={onCreateUser}
+                    onClick={() => {
+                      onCreateUser();
+                      setShowMobileMenu(false);
+                    }}
                     variant="success"
                     fullWidth
                     icon={<UserPlus className="w-4 h-4" />}
@@ -193,5 +269,6 @@ export default function Header({
         </div>
       </div>
     </header>
+  </div>
   );
 }
