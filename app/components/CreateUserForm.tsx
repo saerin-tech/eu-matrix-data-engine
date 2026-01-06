@@ -108,7 +108,6 @@ export default function CreateUserForm({
           contact: formData.contact.trim() || null, 
           roles_and_rights: formData.roles_and_rights,
           user_password: formData.user_password,
-          creator_role: creatorRole,
           created_by: creatorUserName 
         })
       });

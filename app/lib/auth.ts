@@ -186,7 +186,8 @@ export async function createUser(
   contact: string | null,  
   user_password: string,   
   roles_and_rights: UserRole, 
-  created_by: string       
+  created_by: string,      
+  is_deleted: boolean = false 
 ): Promise<AuthResponse> {
   try {
 
@@ -217,7 +218,8 @@ export async function createUser(
           user_password: hashedPassword,
           roles_and_rights,
           created_by,             
-          is_enabled: true            
+          is_enabled: true,
+          is_deleted: is_deleted            
         }
       ])
       .select()

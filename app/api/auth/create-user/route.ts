@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
       contact || null ,
       user_password,
       roles_and_rights,
-      created_by
+      created_by,
+      false
     );
 
     if (result.success) {
