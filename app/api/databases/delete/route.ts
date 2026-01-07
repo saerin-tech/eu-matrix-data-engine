@@ -61,9 +61,7 @@ export async function POST(request: NextRequest) {
         deleted_by: currentUser.user_name,
         deleted_at: deletedAt
       })
-      .eq('id', databaseId)
-      .select()
-      .single();
+      .eq('id', databaseId);
 
     if (error) {
       console.error('Delete error:', error);
