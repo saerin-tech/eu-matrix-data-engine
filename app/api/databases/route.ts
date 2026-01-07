@@ -4,14 +4,13 @@ import { getSupabaseClient } from '../../lib/supabase'
 export async function GET() {
   try {
 
-      const supabase = await getSupabaseClient({
-      mode: 'service',
-    })
+      const supabase = await getSupabaseClient()
 
     // Get custom databases
     const { data: customDatabases, error } = await supabase
       .from('database_connections')
       .select('*') 
+      .eq('is_deleted', false) 
       .order('created_at', { ascending: false }) 
 
     if (error) {
@@ -29,8 +28,12 @@ export async function GET() {
       service_role_key: db.supabase_service_role_key || null,
       is_default: db.is_default || false,
       is_active: db.is_active !== false,
+      is_deleted: db.is_deleted || false,
+      created_by: db.created_by,
       created_at: db.created_at,
       updated_at: db.updated_at,
+      deleted_by: db.deleted_by,
+      deleted_at: db.deleted_at,
     }))
 
     const defaultDatabase = {
@@ -41,6 +44,7 @@ export async function GET() {
       database_url: process.env.DATABASE_URL || '',
       service_role_key: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
       is_default: true,
+      is_deleted: false,
       is_active: true,
     }
 

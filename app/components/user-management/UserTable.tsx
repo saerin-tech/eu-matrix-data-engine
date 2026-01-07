@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Edit, Power, PowerOff, Loader } from 'lucide-react';
-import Button from '../shared/Button';
+import { Edit, Power, PowerOff, Loader, Trash2 } from 'lucide-react';
 import { Table, TableHeader, TableCell, TableRow, EmptyState } from '../shared/Table';
 import BackendPagination from './BackendPagination';
 import { User, PaginationMeta } from '../../types/user';
@@ -12,6 +11,7 @@ interface UserTableProps {
   onItemsPerPageChange: (items: number) => void;
   onToggleStatus: (userId: string, currentStatus: boolean) => Promise<void>;
   onEditUser: (user: User) => void;
+  onDeleteUser: (user: User) => void;
   loading: boolean;
 }
 
@@ -22,6 +22,7 @@ export default function UserTable({
   onItemsPerPageChange,
   onToggleStatus,
   onEditUser,
+  onDeleteUser,
   loading
 }: UserTableProps) {
 
@@ -52,7 +53,7 @@ export default function UserTable({
       <Table>
         <tbody>
           <TableRow hoverable={false}>
-            <EmptyState message="No users found" colSpan={7} />
+            <EmptyState message="No users found" colSpan={8} />
           </TableRow>
         </tbody>
       </Table>
@@ -125,16 +126,12 @@ export default function UserTable({
             {/* Created By */}
             <TableCell>{user.created_by}</TableCell>
 
-            {/* Edit Button */}
+            {/* Action Buttons */}
             <TableCell>
-              <Button 
-                onClick={() => onEditUser(user)}
-                variant="primary"
-                size="sm"
-                icon={<Edit className="w-3 h-3" />}
-              >
-                Edit
-              </Button>
+              <div className="flex items-center gap-4">
+              <Edit className="w-5 h-5 text-blue-700 cursor-pointer" onClick={() => onEditUser(user)} />
+              <Trash2 className="w-5 h-5 text-red-700 cursor-pointer" onClick={() => onDeleteUser(user)}/>
+              </div>
             </TableCell>
           </TableRow>
         ))}

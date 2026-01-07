@@ -1,8 +1,33 @@
 import { getSupabaseClient } from '../lib/supabase'
 import { AuthResponse } from '../types/auth';
 import bcrypt from 'bcryptjs';
+import { cookies } from 'next/headers';
 
 export type UserRole = 'Admin' | 'User';
+
+export interface AuthUser {
+  id: string;
+  user_name: string;
+  roles_and_rights: any;
+  is_enabled: boolean;
+}
+
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  try {
+    const cookieStore = await cookies();
+    const userSession = cookieStore.get('user_session');
+    
+    if (!userSession?.value) {
+      return null;
+    }
+    
+    const user: AuthUser = JSON.parse(userSession.value);
+    return user;
+  } catch (error) {
+    console.error('Get current user error:', error);
+    return null;
+  }
+}
 
 // Generate secure random password
 function generateSecurePassword(): string {
@@ -18,7 +43,7 @@ function generateSecurePassword(): string {
 // Seed initial admin user
 export async function seedUser(): Promise<AuthResponse> {
   try {
-    const supabase = await  getSupabaseClient({ mode: 'service' })
+    const supabase = await  getSupabaseClient()
     // Check if admin exists
     const { data: existingUsers, error: checkError } = await supabase
       .from('users')
@@ -93,7 +118,7 @@ export async function seedUser(): Promise<AuthResponse> {
 // Validate user login credentials
 export async function validateLogin(user_name: string, user_password: string): Promise<AuthResponse> {
   try {
-    const supabase = await getSupabaseClient({ mode: 'service' })
+    const supabase = await getSupabaseClient()
     const { data: user, error } = await supabase
       .from('users')
       .select('id, user_name, user_password, roles_and_rights, is_enabled, first_name, last_name')
@@ -121,6 +146,21 @@ export async function validateLogin(user_name: string, user_password: string): P
         message: 'Your account has been disabled. Please contact your administrator.'
       };
     }
+
+    // Set session cookie
+    const cookieStore = await cookies();
+    const userSession = {
+      id: user.id,
+      user_name: user.user_name,
+      roles_and_rights: user.roles_and_rights,
+    };
+    
+    cookieStore.set('user_session', JSON.stringify(userSession), {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 
+    });    
     return {
       success: true,
       message: 'Login successful',
@@ -146,12 +186,13 @@ export async function createUser(
   contact: string | null,  
   user_password: string,   
   roles_and_rights: UserRole, 
-  created_by: string       
+  created_by: string,      
+  is_deleted: boolean = false 
 ): Promise<AuthResponse> {
   try {
 
     // Check if username already exists
-    const supabase = await getSupabaseClient({ mode: 'service' })
+    const supabase = await getSupabaseClient()
     const { data: existingUser } = await supabase
       .from('users')
       .select('id')
@@ -177,7 +218,8 @@ export async function createUser(
           user_password: hashedPassword,
           roles_and_rights,
           created_by,             
-          is_enabled: true            
+          is_enabled: true,
+          is_deleted: is_deleted            
         }
       ])
       .select()

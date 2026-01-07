@@ -4,6 +4,7 @@ import UserTable from './UserTable';
 import EditUserModal from './EditUserModal';
 import Button from '../shared/Button';
 import { User, PaginationMeta, UsersResponse, UpdateUserData } from '../../types/user';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface UserManagementProps {
   onBack?: () => void; 
@@ -19,6 +20,7 @@ export default function UserManagement({ onBack }: UserManagementProps) {
   });
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Backend se users fetch 
@@ -101,6 +103,29 @@ export default function UserManagement({ onBack }: UserManagementProps) {
     }
   };
 
+  // User delete
+  const handleDeleteUser = async (userId: string) => {
+      try {
+        const response = await fetch('/api/users/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          fetchUsers(meta.currentPage, meta.itemsPerPage);
+        } else {
+          setError(result.message || 'Delete failed');
+        }
+      } catch (err) {
+        console.error('Delete user error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to delete user');
+      }
+    };
+
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -143,6 +168,7 @@ export default function UserManagement({ onBack }: UserManagementProps) {
           onItemsPerPageChange={handleItemsPerPageChange}
           onToggleStatus={handleToggleStatus}
           onEditUser={setEditingUser}
+          onDeleteUser={setDeletingUser}
           loading={loading}
         />
 
@@ -152,6 +178,23 @@ export default function UserManagement({ onBack }: UserManagementProps) {
             user={editingUser}
             onClose={() => setEditingUser(null)}
             onUpdate={handleUpdateUser}
+          />
+        )}
+        {/* Delete Confirmation Modal */}
+        {deletingUser && (
+          <DeleteConfirmationModal
+            title="Delete User"
+            description="Are you sure you want to delete this user?"
+            itemName="User Details:"
+            itemDetails={[
+              { label: 'Name', value: `${deletingUser.first_name} ${deletingUser.last_name}` },
+              { label: 'Username', value: deletingUser.user_name },
+              { label: 'Role', value: deletingUser.roles_and_rights }
+            ]}
+            warningMessage="This action will mark the user as deleted in the system. The user will no longer appear in the user list."
+            confirmButtonText="Yes, Delete User"
+            onClose={() => setDeletingUser(null)}
+            onConfirm={() => handleDeleteUser(deletingUser.id)}
           />
         )}
       </div>
