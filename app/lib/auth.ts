@@ -157,8 +157,9 @@ export async function validateLogin(user_name: string, user_password: string): P
     
     cookieStore.set('user_session', JSON.stringify(userSession), {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'lax',
+      path: '/',
       maxAge: 60 * 60 * 24 * 7 
     });    
     return {
