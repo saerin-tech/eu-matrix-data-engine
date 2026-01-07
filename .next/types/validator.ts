@@ -110,6 +110,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../app/api/databases/delete/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/databases/delete">> = Specific
+  const handler = {} as typeof import("../../app/api/databases/delete/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/api/databases/deploy/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/databases/deploy">> = Specific
@@ -159,6 +168,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/tables">> = Specific
   const handler = {} as typeof import("../../app/api/tables/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/users/delete/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/users/delete">> = Specific
+  const handler = {} as typeof import("../../app/api/users/delete/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

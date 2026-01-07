@@ -76,6 +76,12 @@
       "namedRegex": "^/api/databases/add(?:/)?$"
     },
     {
+      "page": "/api/databases/delete",
+      "regex": "^/api/databases/delete(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/databases/delete(?:/)?$"
+    },
+    {
       "page": "/api/databases/deploy",
       "regex": "^/api/databases/deploy(?:/)?$",
       "routeKeys": {},
@@ -104,6 +110,12 @@
       "regex": "^/api/tables(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/tables(?:/)?$"
+    },
+    {
+      "page": "/api/users/delete",
+      "regex": "^/api/users/delete(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/users/delete(?:/)?$"
     },
     {
       "page": "/api/users/list",
