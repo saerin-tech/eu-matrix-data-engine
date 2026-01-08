@@ -118,10 +118,10 @@
       "namedRegex": "^/api/users/delete(?:/)?$"
     },
     {
-      "page": "/api/users/list",
-      "regex": "^/api/users/list(?:/)?$",
+      "page": "/api/users/List",
+      "regex": "^/api/users/List(?:/)?$",
       "routeKeys": {},
-      "namedRegex": "^/api/users/list(?:/)?$"
+      "namedRegex": "^/api/users/List(?:/)?$"
     },
     {
       "page": "/api/users/toggle-status",
